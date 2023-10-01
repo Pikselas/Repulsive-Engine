@@ -19,12 +19,17 @@ private:
 	ObjectManager<IDXGISwapChain>			swap_chain;
 	ObjectManager<ID3D11RenderTargetView>	render_target_view;
 private:
+	ObjectManager<ID3D11InputLayout>		input_layout;
+private:
 	ObjectManager<ID3D11VertexShader>		vertex_shader;
 	ObjectManager<ID3D11PixelShader>		pixel_shader;
 public:
 	CoreEngine(CustomWindow& window);
 	~CoreEngine() = default;
 public:
-	ObjectManager<ID3D11Device>	GetGraphicsDevice() const;
-
+	ID3D11Device*	GetGraphicsDevice() const;
+	ID3D11DeviceContext* GetDeviceContext() const;
+public:
+	void ClearFrame();
+	void RenderFrame();
 };

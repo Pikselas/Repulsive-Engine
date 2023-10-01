@@ -57,4 +57,13 @@ public:
 		graphics_device->CreateBuffer(&ibd, &isubd, &index_buffer);
 	}
 	~Sprite() = default;
+public:
+	void Draw(ID3D11DeviceContext* device_context)
+	{
+		constexpr unsigned int stride = sizeof(VertexType);
+		constexpr unsigned int offset = 0u;
+		device_context->IASetVertexBuffers(0u, 1u, vertex_buffer.GetAddressOf(), &stride, &offset);
+		device_context->IASetIndexBuffer(index_buffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
+		device_context->DrawIndexed(6u, 0u, 0u);
+	}
 };

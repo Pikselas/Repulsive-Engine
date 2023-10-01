@@ -58,13 +58,37 @@ CoreEngine::CoreEngine(CustomWindow& window)
 	graphics_device->CreateVertexShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &vertex_shader);
 	device_context->VSSetShader(vertex_shader.Get(), nullptr, 0);
 
+	D3D11_INPUT_ELEMENT_DESC ied[] = 
+	{
+		{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+	};
+
+	graphics_device->CreateInputLayout(ied, 1, shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
+	device_context->IASetInputLayout(input_layout.Get());
+
 	D3DReadFileToBlob(pixel_shader_path.c_str(), &shader_buffer);
 	graphics_device->CreatePixelShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &pixel_shader);
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
 
 }
 
-CoreEngine::ObjectManager<ID3D11Device> CoreEngine::GetGraphicsDevice() const
+ID3D11Device* CoreEngine::GetGraphicsDevice() const
 {
-	return graphics_device;
+	return graphics_device.Get();
+}
+
+ID3D11DeviceContext* CoreEngine::GetDeviceContext() const
+{
+	return device_context.Get();
+}
+
+void CoreEngine::ClearFrame()
+{
+	constexpr float color[] = { 0.0f,0.0f,0.0f,1.0f };
+	device_context->ClearRenderTargetView(render_target_view.Get(), color);
+}
+
+void CoreEngine::RenderFrame()
+{
+	swap_chain->Present(1u, 0u);
 }
