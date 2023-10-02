@@ -1,6 +1,7 @@
 #pragma once
 #include<d3d11.h>
 #include<wrl.h>
+#include<DirectXMath.h>
 
 #include<span>
 class Sprite
@@ -11,6 +12,8 @@ private:
 		float x, y;
 		float u, v;
 	};
+public:
+	DirectX::XMMATRIX transformation;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;

@@ -70,6 +70,16 @@ CoreEngine::CoreEngine(CustomWindow& window)
 	D3DReadFileToBlob(pixel_shader_path.c_str(), &shader_buffer);
 	graphics_device->CreatePixelShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &pixel_shader);
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
+
+	D3D11_BUFFER_DESC bd = { 0 };
+	bd.ByteWidth = sizeof(DirectX::XMMATRIX);
+	bd.Usage = D3D11_USAGE_DYNAMIC;
+	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+	graphics_device->CreateBuffer(&bd, nullptr, &transformation_buffer);
+
+	device_context->VSSetConstantBuffers(0u, 1u, transformation_buffer.GetAddressOf());
 }
 
 ID3D11Device* CoreEngine::GetGraphicsDevice() const
@@ -80,6 +90,14 @@ ID3D11Device* CoreEngine::GetGraphicsDevice() const
 ID3D11DeviceContext* CoreEngine::GetDeviceContext() const
 {
 	return device_context.Get();
+}
+
+void CoreEngine::SetTransformation(const DirectX::XMMATRIX transformation)
+{
+	D3D11_MAPPED_SUBRESOURCE ms;
+	device_context->Map(transformation_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
+	std::memcpy(ms.pData, &transformation, sizeof(transformation));
+	device_context->Unmap(transformation_buffer.Get(), 0u);
 }
 
 void CoreEngine::ClearFrame()

@@ -1,6 +1,7 @@
 #pragma once
 #include<wrl.h>
 #include<d3d11.h>
+#include<DirectXMath.h>
 #include<D3DCompiler.h>
 #include<filesystem>
 #pragma comment(lib,"d3d11.lib")
@@ -25,6 +26,8 @@ private:
 private:
 	ObjectManager<ID3D11VertexShader>		vertex_shader;
 	ObjectManager<ID3D11PixelShader>		pixel_shader;
+private:
+	ObjectManager<ID3D11Buffer>				transformation_buffer;
 public:
 	CoreEngine(CustomWindow& window);
 	~CoreEngine() = default;
@@ -33,6 +36,8 @@ public:
 	ID3D11DeviceContext* GetDeviceContext() const;
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
+public:
+	void SetTransformation(const DirectX::XMMATRIX transformation);
 public:
 	void ClearFrame();
 	void RenderFrame();

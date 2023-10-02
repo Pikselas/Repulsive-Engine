@@ -5,13 +5,18 @@ struct VertexShaderOut // this is the ouput type
 };
 
 
+cbuffer cbuff
+{
+    matrix transform;
+};
+
 VertexShaderOut main(float2 pos : POSITION, float2 tex : TEXCOORD)
 {
     VertexShaderOut Out;
     
     // 
     
-    Out.pos = float4(pos ,0.0f, 1.0f);
+    Out.pos = mul(transform , float4(pos, 0.0f, 1.0f));
     Out.tex = tex;
     return Out;
 }

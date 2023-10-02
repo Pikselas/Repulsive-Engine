@@ -12,9 +12,12 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	ImageSprite sprite(engine.GetGraphicsDevice(), Image(R"(C:\Users\Aritra Maji\Downloads\OIG-removebg-preview.png)"));
 
+	sprite.transformation = DirectX::XMMatrixTranslation(0.5f, 0.5f, 0.0f);
+
 	while (window.IsOpen())
 	{
 		engine.ClearFrame();
+		engine.SetTransformation(sprite.transformation);
 		sprite.Draw(engine.GetDeviceContext());
 		engine.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
