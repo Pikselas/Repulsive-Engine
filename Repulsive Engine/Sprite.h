@@ -2,28 +2,47 @@
 #include<d3d11.h>
 #include<wrl.h>
 
+#include<span>
 class Sprite
 {
 private:
 	struct VertexType
 	{
 		float x, y;
-		//float u, v;
+		float u, v;
 	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
 public:
-	Sprite(Microsoft::WRL::ComPtr<ID3D11Device> graphics_device)
+	struct Points
+	{
+		int left, right, top, bottom;
+	};
+	Sprite(ID3D11Device* graphics_device , Points points , float winWidth , float winHeight)
 	{
 
-		constexpr VertexType Vertices[] = {
-			{-1.0f , 1.0f },
-			{ 1.0f , 1.0f },
-			{-1.0f , -1.0f },
-			{ 1.0f , -1.0f },
+		const float right = (winWidth / winHeight) * (points.right / winWidth);
+		const float bottom = (winWidth / winHeight) * (points.bottom / winHeight);
+
+		const float left = (winWidth / winHeight) * (points.left / winWidth);
+		const float top = (winWidth / winHeight) * (points.top / winHeight);
+
+		const float x_ = 0.5f * (right - left);
+		const float y_ = 0.5f * (bottom - top);
+
+		//constexpr float x_ = 0.5f * (800.0f / 600.0f) * (400.0f / 800.0f);
+		//constexpr float y_ = 0.5f * (800.0f / 600.0f) * (400.0f / 600.0f);
+
+		const VertexType Vertices[] = 
+		{
+			{ -x_ , y_ , 0.0f , 0.0f},
+			{ x_ , y_  , 1.0f , 0.0f},
+			{-x_ , -y_  , 0.0f , 1.0f},
+			{ x_ , -y_  , 1.0f , 1.0f},
 		};
-		constexpr unsigned int Indices[] = {
+		constexpr unsigned int Indices[] = 
+		{
 			2 , 0 ,1,
 			2 , 1 ,3,
 		};
@@ -58,7 +77,7 @@ public:
 	}
 	~Sprite() = default;
 public:
-	void Draw(ID3D11DeviceContext* device_context)
+	virtual void Draw(ID3D11DeviceContext* device_context)
 	{
 		constexpr unsigned int stride = sizeof(VertexType);
 		constexpr unsigned int offset = 0u;

@@ -61,15 +61,15 @@ CoreEngine::CoreEngine(CustomWindow& window)
 	D3D11_INPUT_ELEMENT_DESC ied[] = 
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,sizeof(float) * 2,D3D11_INPUT_PER_VERTEX_DATA,0},
 	};
 
-	graphics_device->CreateInputLayout(ied, 1, shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
+	graphics_device->CreateInputLayout(ied, 2, shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
 	device_context->IASetInputLayout(input_layout.Get());
 
 	D3DReadFileToBlob(pixel_shader_path.c_str(), &shader_buffer);
 	graphics_device->CreatePixelShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &pixel_shader);
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
-
 }
 
 ID3D11Device* CoreEngine::GetGraphicsDevice() const

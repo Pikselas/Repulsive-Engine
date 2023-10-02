@@ -8,6 +8,8 @@
 
 #include"CustomWindow.h"
 
+#include"Image.h"
+
 class CoreEngine
 {
 private:
@@ -29,6 +31,8 @@ public:
 public:
 	ID3D11Device*	GetGraphicsDevice() const;
 	ID3D11DeviceContext* GetDeviceContext() const;
+private:
+	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
 public:
 	void ClearFrame();
 	void RenderFrame();

@@ -144,6 +144,7 @@
     <ClInclude Include="CustomWindow.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="Image.h" />
+    <ClInclude Include="ImageSprite.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="StandardWindow.h" />
     <ClInclude Include="Window.h" />
