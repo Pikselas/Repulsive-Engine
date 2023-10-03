@@ -83,6 +83,21 @@ half_window_width((float)window.GetWidth() / 2) , half_window_height((float)wind
 	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_buffer);
 
 	device_context->VSSetConstantBuffers(0u, 1u, vertex_shader_buffer.GetAddressOf());
+
+	D3D11_BLEND_DESC blendDesc = {};
+	blendDesc.RenderTarget[0].BlendEnable = TRUE;
+	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;							// uses the alpha channel of the source pixel as the blend factor,
+	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;					// uses the inverse of the alpha channel of the source pixel as the blend factor
+	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;								// adds the source and destination blend factors
+	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;							// it is fully opaque
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;						// it is fully transparent
+	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;		// enables all the color channels for writing
+
+	ObjectManager<ID3D11BlendState> blendState;
+	graphics_device->CreateBlendState(&blendDesc, &blendState);
+	device_context->OMSetBlendState(blendState.Get(), nullptr, 0xffffffff);
+
 }
 
 ID3D11Device* CoreEngine::GetGraphicsDevice() const
