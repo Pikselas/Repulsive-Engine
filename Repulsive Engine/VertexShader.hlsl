@@ -13,10 +13,10 @@ cbuffer cbuff
 VertexShaderOut main(float2 pos : POSITION, float2 tex : TEXCOORD)
 {
     VertexShaderOut Out;
-    //pos.y = 300 -pos.y;
     pos = mul(transform, float4(pos, 0.0f, 1.0f)).xy;
     pos /= float2(400 , 300);
-    pos -= float2(1.0f , 1.0f);
+    pos.x -= 1.0f;
+    pos.y = 1.0f - pos.y;
     Out.pos = float4(pos , 0.0f , 1.0f);
     Out.tex = tex;
     return Out;

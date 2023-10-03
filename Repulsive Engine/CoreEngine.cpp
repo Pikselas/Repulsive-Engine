@@ -87,17 +87,18 @@ ID3D11Device* CoreEngine::GetGraphicsDevice() const
 	return graphics_device.Get();
 }
 
-ID3D11DeviceContext* CoreEngine::GetDeviceContext() const
-{
-	return device_context.Get();
-}
-
 void CoreEngine::SetTransformation(const DirectX::XMMATRIX transformation)
 {
 	D3D11_MAPPED_SUBRESOURCE ms;
 	device_context->Map(transformation_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
 	std::memcpy(ms.pData, &transformation, sizeof(transformation));
 	device_context->Unmap(transformation_buffer.Get(), 0u);
+}
+
+void CoreEngine::Draw(const Sprite& sprite)
+{
+	SetTransformation(sprite.GetTransformation());
+	sprite.Draw(device_context.Get());
 }
 
 void CoreEngine::ClearFrame()

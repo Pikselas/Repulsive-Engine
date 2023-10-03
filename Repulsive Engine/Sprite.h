@@ -12,8 +12,8 @@ private:
 		float x, y;
 		float u, v;
 	};
-public:
-	DirectX::XMMATRIX transformation;
+private:
+	DirectX::XMMATRIX transformation = DirectX::XMMatrixIdentity();
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
@@ -35,7 +35,7 @@ public:
 		//const float y_ = 0.5f * (bottom - top);
 
 		const float x_ = (points.right - points.left) * 0.5;
-		const float y_ = (points.bottom - points.top) * 0.5;
+		const float y_ = -(points.bottom - points.top) * 0.5;
 
 		//constexpr float x_ = 0.5f * (800.0f / 600.0f) * (400.0f / 800.0f);
 		//constexpr float y_ = 0.5f * (800.0f / 600.0f) * (400.0f / 600.0f);
@@ -83,12 +83,21 @@ public:
 	}
 	~Sprite() = default;
 public:
-	virtual void Draw(ID3D11DeviceContext* device_context)
+	virtual void Draw(ID3D11DeviceContext* device_context) const
 	{
 		constexpr unsigned int stride = sizeof(VertexType);
 		constexpr unsigned int offset = 0u;
 		device_context->IASetVertexBuffers(0u, 1u, vertex_buffer.GetAddressOf(), &stride, &offset);
 		device_context->IASetIndexBuffer(index_buffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
 		device_context->DrawIndexed(6u, 0u, 0u);
+	}
+public:
+	void SetTransformation(const DirectX::XMMATRIX transformation)
+	{
+		this->transformation = transformation;
+	}
+	DirectX::XMMATRIX GetTransformation() const
+	{
+		return transformation;
 	}
 };

@@ -37,7 +37,7 @@ public:
 
 	}
 
-	void Draw(ID3D11DeviceContext* context) override
+	void Draw(ID3D11DeviceContext* context) const override
 	{
 		context->PSSetShaderResources(0, 1, TEXTURE_VIEW.GetAddressOf());
 		Sprite::Draw(context);
