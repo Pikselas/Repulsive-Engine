@@ -25,14 +25,17 @@ public:
 	Sprite(ID3D11Device* graphics_device , Points points , float winWidth , float winHeight)
 	{
 
-		const float right = (winWidth / winHeight) * (points.right / winWidth);
-		const float bottom = (winWidth / winHeight) * (points.bottom / winHeight);
+		//const float right = (winWidth / winHeight) * (points.right / winWidth);
+		//const float bottom = (winWidth / winHeight) * (points.bottom / winHeight);
 
-		const float left = (winWidth / winHeight) * (points.left / winWidth);
-		const float top = (winWidth / winHeight) * (points.top / winHeight);
+		//const float left = (winWidth / winHeight) * (points.left / winWidth);
+		//const float top = (winWidth / winHeight) * (points.top / winHeight);
 
-		const float x_ = 0.5f * (right - left);
-		const float y_ = 0.5f * (bottom - top);
+		//const float x_ = 0.5f * (right - left);
+		//const float y_ = 0.5f * (bottom - top);
+
+		const float x_ = (points.right - points.left) * 0.5;
+		const float y_ = (points.bottom - points.top) * 0.5;
 
 		//constexpr float x_ = 0.5f * (800.0f / 600.0f) * (400.0f / 800.0f);
 		//constexpr float y_ = 0.5f * (800.0f / 600.0f) * (400.0f / 600.0f);
