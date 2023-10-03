@@ -22,7 +22,7 @@ public:
 	{
 		int left, right, top, bottom;
 	};
-	Sprite(ID3D11Device* graphics_device , Points points , float winWidth , float winHeight)
+	Sprite(ID3D11Device* graphics_device , Points points )
 	{
 
 		//const float right = (winWidth / winHeight) * (points.right / winWidth);

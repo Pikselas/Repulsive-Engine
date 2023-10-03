@@ -11,7 +11,7 @@ private:
 public:
 	ImageSprite(ID3D11Device* graphics_device, const Image& image) 
 		:
-	Sprite(graphics_device, Sprite::Points{ 0 , (int)image.GetWidth() , 0 , (int)image.GetHeight() } , 800.0f , 600.0f)
+	Sprite(graphics_device, Sprite::Points{ 0 , (int)image.GetWidth() , 0 , (int)image.GetHeight() })
 	{
 		D3D11_TEXTURE2D_DESC desc = {};
 		desc.Width = image.GetWidth();

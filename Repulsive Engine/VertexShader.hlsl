@@ -7,6 +7,7 @@ struct VertexShaderOut // this is the ouput type
 
 cbuffer cbuff
 {
+    float2 half_window_size;
     matrix transform;
 };
 
@@ -14,7 +15,7 @@ VertexShaderOut main(float2 pos : POSITION, float2 tex : TEXCOORD)
 {
     VertexShaderOut Out;
     pos = mul(transform, float4(pos, 0.0f, 1.0f)).xy;
-    pos /= float2(400 , 300);
+    pos /= half_window_size;
     pos.x -= 1.0f;
     pos.y = 1.0f - pos.y;
     Out.pos = float4(pos , 0.0f , 1.0f);

@@ -1,6 +1,9 @@
 #include "CoreEngine.h"
 
-CoreEngine::CoreEngine(CustomWindow& window)
+CoreEngine::CoreEngine(CustomWindow& window) 
+	:
+
+half_window_width((float)window.GetWidth() / 2) , half_window_height((float)window.GetHeight() / 2)
 {
 	ObjectManager<ID3D11Resource> BackBuffer;
 	DXGI_SWAP_CHAIN_DESC sd = { 0 };
@@ -72,14 +75,14 @@ CoreEngine::CoreEngine(CustomWindow& window)
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
 
 	D3D11_BUFFER_DESC bd = { 0 };
-	bd.ByteWidth = sizeof(DirectX::XMMATRIX);
+	bd.ByteWidth = sizeof(VertexShaderBufferT);
 	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	graphics_device->CreateBuffer(&bd, nullptr, &transformation_buffer);
+	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_buffer);
 
-	device_context->VSSetConstantBuffers(0u, 1u, transformation_buffer.GetAddressOf());
+	device_context->VSSetConstantBuffers(0u, 1u, vertex_shader_buffer.GetAddressOf());
 }
 
 ID3D11Device* CoreEngine::GetGraphicsDevice() const
@@ -90,9 +93,10 @@ ID3D11Device* CoreEngine::GetGraphicsDevice() const
 void CoreEngine::SetTransformation(const DirectX::XMMATRIX transformation)
 {
 	D3D11_MAPPED_SUBRESOURCE ms;
-	device_context->Map(transformation_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
-	std::memcpy(ms.pData, &transformation, sizeof(transformation));
-	device_context->Unmap(transformation_buffer.Get(), 0u);
+	device_context->Map(vertex_shader_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
+	VertexShaderBufferT buffer_data{ half_window_width , half_window_height , transformation };
+	std::memcpy(ms.pData, &buffer_data, sizeof(VertexShaderBufferT));
+	device_context->Unmap(vertex_shader_buffer.Get(), 0u);
 }
 
 void CoreEngine::Draw(const Sprite& sprite)
