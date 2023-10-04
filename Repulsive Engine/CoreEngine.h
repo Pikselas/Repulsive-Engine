@@ -8,7 +8,6 @@
 #pragma comment(lib,"D3DCompiler.lib")
 
 #include"CustomWindow.h"
-#include"Sprite.h"
 
 class CoreEngine
 {
@@ -44,10 +43,13 @@ public:
 	ID3D11Device*	GetGraphicsDevice() const;
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
-private:
-	void SetTransformation(const DirectX::XMMATRIX transformation);
 public:
-	void Draw(const Sprite& sprite);
+	void SetComponent(ID3D11Buffer* indices);
+	void SetComponent(const DirectX::XMMATRIX transformation);
+	void SetComponent(ID3D11ShaderResourceView* texture_view);
+	void SetComponent(ID3D11Buffer* vertices, unsigned int stride);
+public:
+	void Draw(unsigned int size);
 public:
 	void ClearFrame();
 	void RenderFrame();

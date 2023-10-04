@@ -105,7 +105,12 @@ ID3D11Device* CoreEngine::GetGraphicsDevice() const
 	return graphics_device.Get();
 }
 
-void CoreEngine::SetTransformation(const DirectX::XMMATRIX transformation)
+void CoreEngine::SetComponent(ID3D11Buffer* indices)
+{
+	device_context->IASetIndexBuffer(indices, DXGI_FORMAT_R32_UINT, 0u);
+}
+
+void CoreEngine::SetComponent(const DirectX::XMMATRIX transformation)
 {
 	D3D11_MAPPED_SUBRESOURCE ms;
 	device_context->Map(vertex_shader_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
@@ -114,10 +119,20 @@ void CoreEngine::SetTransformation(const DirectX::XMMATRIX transformation)
 	device_context->Unmap(vertex_shader_buffer.Get(), 0u);
 }
 
-void CoreEngine::Draw(const Sprite& sprite)
+void CoreEngine::SetComponent(ID3D11Buffer* vertices, unsigned int stride)
 {
-	SetTransformation(sprite.GetTransformation());
-	sprite.Draw(device_context.Get());
+	constexpr unsigned int offset = 0u;
+	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride, &offset);
+}
+
+void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
+{
+	device_context->PSSetShaderResources(0u, 1u, &texture_view);
+}
+
+void CoreEngine::Draw(unsigned int size)
+{
+	device_context->DrawIndexed(size, 0u, 0u);
 }
 
 void CoreEngine::ClearFrame()
