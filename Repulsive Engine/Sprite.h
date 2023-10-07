@@ -1,25 +1,30 @@
 #pragma once
-#include<d3d11.h>
-#include<wrl.h>
-#include<DirectXMath.h>
+#include"Engine.h"
 
-#include<span>
-
-#include"CoreEngine.h"
 class Sprite
 {
 private:
 	DirectX::XMVECTOR position = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f , 1.0f);
 	DirectX::XMMATRIX transformation = DirectX::XMMatrixIdentity();
 public:
-	virtual void Draw(CoreEngine& engine) const = 0;
+	virtual void Draw(Engine& engine) const = 0;
+protected:
+	virtual void DrawNonTransformed(Engine& engine) const = 0;
 public:
-	void SetTransformation(const DirectX::XMMATRIX transformation)
+	void SetPosition(const DirectX::XMVECTOR position)
 	{
-		this->transformation = transformation;
+		this->position = position;
+	}
+	void SetTransformation(const DirectX::XMMATRIX transform)
+	{
+		transformation = transform;
 	}
 	DirectX::XMMATRIX GetTransformation() const
 	{
-		return transformation * DirectX::XMMatrixTranslation(DirectX::XMVectorGetX(position), DirectX::XMVectorGetY(position), 0.0f);
+		return transformation * DirectX::XMMatrixTranslationFromVector(position);
+	}
+	DirectX::XMVECTOR GetPosition() const
+	{
+		return position;
 	}
 };

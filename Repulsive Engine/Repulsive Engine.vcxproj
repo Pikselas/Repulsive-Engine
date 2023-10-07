@@ -140,8 +140,9 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="CustomWindow.h" />
+    <ClInclude Include="CoreEngine.h" />
+    <ClInclude Include="Engine.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="ImageSprite.h" />

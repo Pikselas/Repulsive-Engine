@@ -98,16 +98,27 @@ half_window_width((float)window.GetWidth() / 2) , half_window_height((float)wind
 	graphics_device->CreateBlendState(&blendDesc, &blendState);
 	device_context->OMSetBlendState(blendState.Get(), nullptr, 0xffffffff);
 
-}
+	constexpr unsigned int Indices[] =
+	{
+		2 , 0 ,1,
+		2 , 1 ,3,
+	};
 
-ID3D11Device* CoreEngine::GetGraphicsDevice() const
-{
-	return graphics_device.Get();
-}
+	D3D11_BUFFER_DESC ibd = { 0 };
+	ibd.ByteWidth = sizeof(unsigned int) * 6;
+	ibd.Usage = D3D11_USAGE_DEFAULT;
+	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	ibd.CPUAccessFlags = 0u;
+	ibd.MiscFlags = 0u;
+	ibd.StructureByteStride = sizeof(unsigned int);
 
-void CoreEngine::SetComponent(ID3D11Buffer* indices)
-{
-	device_context->IASetIndexBuffer(indices, DXGI_FORMAT_R32_UINT, 0u);
+	D3D11_SUBRESOURCE_DATA isubd = { 0 };
+	isubd.pSysMem = Indices;
+
+	// create index buffer
+	graphics_device->CreateBuffer(&ibd, &isubd, &index_buffer);
+	device_context->IASetIndexBuffer(index_buffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
+
 }
 
 void CoreEngine::SetComponent(const DirectX::XMMATRIX transformation)
@@ -119,10 +130,66 @@ void CoreEngine::SetComponent(const DirectX::XMMATRIX transformation)
 	device_context->Unmap(vertex_shader_buffer.Get(), 0u);
 }
 
-void CoreEngine::SetComponent(ID3D11Buffer* vertices, unsigned int stride)
+void CoreEngine::SetComponent(ID3D11Buffer* vertices)
 {
 	constexpr unsigned int offset = 0u;
-	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride, &offset);
+	constexpr unsigned int stride = sizeof(VertexType);
+	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride , &offset);
+}
+
+ImageSprite CoreEngine::CreateSprite(const Image& image)
+{
+	const float x_ = image.GetWidth() * 0.5;
+	const float y_ = -(image.GetHeight() * 0.5);
+
+	VertexType Vertices[] =
+	{
+		{ -x_ , y_ , 0.0f , 0.0f},
+		{ x_ , y_  , 1.0f , 0.0f},
+		{-x_ , -y_  , 0.0f , 1.0f},
+		{ x_ , -y_  , 1.0f , 1.0f},
+	};
+
+	ImageSprite sprite;
+
+	// create vertex buffer
+	D3D11_BUFFER_DESC bd = { 0 };
+	bd.ByteWidth = sizeof(VertexType) * 4;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.CPUAccessFlags = 0u;
+	bd.MiscFlags = 0u;
+	bd.StructureByteStride = sizeof(VertexType);
+
+	D3D11_SUBRESOURCE_DATA subd = { 0 };
+	subd.pSysMem = Vertices;
+
+	graphics_device->CreateBuffer(&bd, &subd, &sprite.vertex_buffer);
+
+	// create texture data
+	D3D11_TEXTURE2D_DESC desc = {};
+	desc.Width = image.GetWidth();
+	desc.Height = image.GetHeight();
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+	D3D11_SUBRESOURCE_DATA subresource_data = {};
+
+	auto data = image.Raw();
+	subresource_data.pSysMem = data;
+	subresource_data.SysMemPitch = sizeof(*data) * image.GetWidth();
+
+	subresource_data.SysMemSlicePitch = 0;
+
+	graphics_device->CreateTexture2D(&desc, &subresource_data, &sprite.TEXTURE);
+	graphics_device->CreateShaderResourceView(sprite.TEXTURE.Get(), nullptr, &sprite.TEXTURE_VIEW);
+
+	return sprite;
 }
 
 void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
@@ -130,9 +197,9 @@ void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
 	device_context->PSSetShaderResources(0u, 1u, &texture_view);
 }
 
-void CoreEngine::Draw(unsigned int size)
+void CoreEngine::Draw()
 {
-	device_context->DrawIndexed(size, 0u, 0u);
+	device_context->DrawIndexed(6, 0u, 0u);
 }
 
 void CoreEngine::ClearFrame()

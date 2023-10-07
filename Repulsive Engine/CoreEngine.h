@@ -1,19 +1,25 @@
 #pragma once
-#include<wrl.h>
-#include<d3d11.h>
-#include<DirectXMath.h>
+
 #include<D3DCompiler.h>
-#include<filesystem>
-#pragma comment(lib,"d3d11.lib")
 #pragma comment(lib,"D3DCompiler.lib")
 
+#include"Image.h"
+#include"ImageSprite.h"
 #include"CustomWindow.h"
 
-class CoreEngine
+#include "Engine.h"
+
+class CoreEngine : public Engine
 {
 private:
 	template<typename ObjectT>
 	using ObjectManager = Microsoft::WRL::ComPtr<ObjectT>;
+private:
+	struct VertexType
+	{
+		float x, y;
+		float u, v;
+	};
 private:
 	struct VertexShaderBufferT
 	{
@@ -33,23 +39,22 @@ private:
 	ObjectManager<ID3D11PixelShader>		pixel_shader;
 private:
 	ObjectManager<ID3D11Buffer>				vertex_shader_buffer;
+	ObjectManager<ID3D11Buffer>				index_buffer;
 private:
 	const float half_window_width;
 	const float half_window_height;
 public:
 	CoreEngine(CustomWindow& window);
-	~CoreEngine() = default;
-public:
-	ID3D11Device*	GetGraphicsDevice() const;
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
 public:
-	void SetComponent(ID3D11Buffer* indices);
-	void SetComponent(const DirectX::XMMATRIX transformation);
-	void SetComponent(ID3D11ShaderResourceView* texture_view);
-	void SetComponent(ID3D11Buffer* vertices, unsigned int stride);
+	void SetComponent(const DirectX::XMMATRIX transformation) override;
+	void SetComponent(ID3D11ShaderResourceView* texture_view) override;
+	void SetComponent(ID3D11Buffer* vertices) override;
 public:
-	void Draw(unsigned int size);
+	ImageSprite CreateSprite(const Image& image);
+public:
+	void Draw() override;
 public:
 	void ClearFrame();
 	void RenderFrame();

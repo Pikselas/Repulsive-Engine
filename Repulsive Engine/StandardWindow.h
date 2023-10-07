@@ -14,6 +14,7 @@ public:
 public:
 	bool IsOpen() const;
 	unsigned int GetWindowCount() const;
+	void SetIcon(const std::string& IconPath);
 protected:
 	LRESULT CALLBACK EventHandler(HWND handle, UINT msgcode, WPARAM wparam, LPARAM lparam) override;
 };

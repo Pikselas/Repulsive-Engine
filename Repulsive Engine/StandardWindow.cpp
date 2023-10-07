@@ -48,6 +48,13 @@ unsigned int StandardWindow::GetWindowCount() const
 	return WindowCount;
 }
 
+void StandardWindow::SetIcon(const std::string& IconPath)
+{
+	auto icon = (HICON)LoadImage(NULL, IconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+	SendMessage(window_handle, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(window_handle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+}
+
 LRESULT StandardWindow::EventHandler(HWND handle, UINT msgcode, WPARAM wparam, LPARAM lparam)
 {
 	switch (msgcode)
