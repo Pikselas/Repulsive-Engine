@@ -48,9 +48,16 @@ unsigned int StandardWindow::GetWindowCount() const
 	return WindowCount;
 }
 
-void StandardWindow::SetIcon(const std::string& IconPath)
+void StandardWindow::SetIcon(const std::string& IconPath , unsigned int size_x, unsigned int size_y)
 {
-	auto icon = (HICON)LoadImage(NULL, IconPath.c_str(), IMAGE_ICON, 0, 0, LR_LOADFROMFILE);
+	auto icon = (HICON)LoadImage(NULL, IconPath.c_str(), IMAGE_ICON, size_x, size_y, LR_LOADFROMFILE);
+	SendMessage(window_handle, WM_SETICON, ICON_BIG, (LPARAM)icon);
+	SendMessage(window_handle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
+}
+
+void StandardWindow::SetIcon(const unsigned int& IconID , unsigned int size_x, unsigned int size_y)
+{
+	auto icon = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(IconID), IMAGE_ICON, size_x, size_y, 0);
 	SendMessage(window_handle, WM_SETICON, ICON_BIG, (LPARAM)icon);
 	SendMessage(window_handle, WM_SETICON, ICON_SMALL, (LPARAM)icon);
 }
