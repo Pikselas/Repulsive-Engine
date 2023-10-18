@@ -3,12 +3,8 @@
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-
-	constexpr unsigned int width = 800;
-	constexpr unsigned int height = 600;
-
-	CoreEngine engine(800 , 600);
-	StandardWindow window("Repulsive Engine" , width , height);
+	CoreEngine engine;
+	StandardWindow window("Repulsive Engine");
 	window.SetIcon(R"(C:\Users\Aritra Maji\Downloads\logo.ico)");
 
 	auto renderer = engine.CreateRenderer(window);

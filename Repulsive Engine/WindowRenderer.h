@@ -7,7 +7,8 @@ class WindowRenderer : public RenderDevice
 	friend class CoreEngine;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> swap_chain;
 private:
-	WindowRenderer(ID3D11Device* device , HWND handle)
+	WindowRenderer(ID3D11Device* device , HWND handle , unsigned int width , unsigned int height) 		:
+	RenderDevice(width, height)
 	{	
 		DXGI_SWAP_CHAIN_DESC sd = { 0 };
 		sd.BufferDesc.Width = 0;												// look at the window and use it's size

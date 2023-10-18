@@ -6,7 +6,16 @@ class RenderDevice
 {
 	friend class CoreEngine;
 private:
+	const unsigned int width;
+	const unsigned int height;
+private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> render_target_view;
+protected:
+	RenderDevice(unsigned int width, unsigned int height)
+		:
+		width(width),
+		height(height)
+	{}
 private:
 	ID3D11RenderTargetView* GetTarget() const
 	{

@@ -1,21 +1,8 @@
 #include "CoreEngine.h"
 
-CoreEngine::CoreEngine(unsigned int width, unsigned int height)
-	:
-
-half_window_width((float)width / 2) , half_window_height((float)height / 2)
+CoreEngine::CoreEngine()
 {
 	D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &graphics_device, nullptr, &device_context);
-
-	// create the viewport
-	D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = width;
-	viewport.Height = height;
-	viewport.MaxDepth = 1;	// maximum depth for z axis
-	viewport.MinDepth = 0;	// minimum depth for z axis
-	device_context->RSSetViewports(1u, &viewport);
 
 	// set the primitive topology
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -47,14 +34,20 @@ half_window_width((float)width / 2) , half_window_height((float)height / 2)
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
 
 	D3D11_BUFFER_DESC bd = { 0 };
-	bd.ByteWidth = sizeof(VertexShaderBufferT);
+	bd.ByteWidth = sizeof(DirectX::XMMATRIX);
 	bd.Usage = D3D11_USAGE_DYNAMIC;
 	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_buffer);
+	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_transform_buffer);
+	
 
-	device_context->VSSetConstantBuffers(0u, 1u, vertex_shader_buffer.GetAddressOf());
+	// minimum constant buffer size is 16 bytes (multiple of 16)
+	bd.ByteWidth = sizeof(float) * 2 < 16 ? 16 : sizeof(float) * 2;
+	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_surface_size_buffer);
+	
+	ID3D11Buffer* const shader_buffers[] = { vertex_shader_transform_buffer.Get() , vertex_shader_surface_size_buffer.Get() };
+	device_context->VSSetConstantBuffers(0u, std::size(shader_buffers), shader_buffers);
 
 	D3D11_BLEND_DESC blendDesc = {};
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
@@ -96,10 +89,9 @@ half_window_width((float)width / 2) , half_window_height((float)height / 2)
 void CoreEngine::SetComponent(const DirectX::XMMATRIX transformation)
 {
 	D3D11_MAPPED_SUBRESOURCE ms;
-	device_context->Map(vertex_shader_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
-	VertexShaderBufferT buffer_data{ half_window_width , half_window_height , transformation };
-	std::memcpy(ms.pData, &buffer_data, sizeof(VertexShaderBufferT));
-	device_context->Unmap(vertex_shader_buffer.Get(), 0u);
+	device_context->Map(vertex_shader_transform_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
+	std::memcpy(ms.pData, &transformation, sizeof(DirectX::XMMATRIX));
+	device_context->Unmap(vertex_shader_transform_buffer.Get(), 0u);
 }
 
 void CoreEngine::SetComponent(ID3D11Buffer* vertices)
@@ -169,11 +161,30 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 
 WindowRenderer CoreEngine::CreateRenderer(CustomWindow& window)
 {
-	return WindowRenderer(graphics_device.Get(), window.window_handle);
+	return WindowRenderer(graphics_device.Get(), window.window_handle , window.GetWidth() , window.GetHeight());
 }
 
 void CoreEngine::SetRenderer(const RenderDevice& render_device)
 {
+	// create and set the viewport
+	D3D11_VIEWPORT viewport = {};
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	viewport.Width = render_device.width;
+	viewport.Height = render_device.height;
+	viewport.MaxDepth = 1;	// maximum depth for z axis
+	viewport.MinDepth = 0;	// minimum depth for z axis
+	
+	device_context->RSSetViewports(1u, &viewport);
+
+	const float surface_size[] = { static_cast<float>(render_device.width) / 2 , static_cast<float>(render_device.height) / 2 };
+
+	// update the surface size in vertex shader
+	D3D11_MAPPED_SUBRESOURCE ms;
+	device_context->Map(vertex_shader_surface_size_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
+	std::memcpy(ms.pData, surface_size, sizeof(float) * std::size(surface_size));
+	device_context->Unmap(vertex_shader_surface_size_buffer.Get(), 0u);
+
 	auto render_target_view = render_device.GetTarget();
 	device_context->OMSetRenderTargets(1u,&render_target_view, nullptr);
 }

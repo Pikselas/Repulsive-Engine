@@ -22,13 +22,6 @@ private:
 		float u, v;
 	};
 private:
-	struct VertexShaderBufferT
-	{
-		float half_window_width;
-		float half_window_height;
-		DirectX::XMMATRIX transformation;
-	};
-private:
 	ObjectManager<ID3D11Device>				graphics_device;
 	ObjectManager<ID3D11DeviceContext>		device_context;
 private:
@@ -37,13 +30,11 @@ private:
 	ObjectManager<ID3D11VertexShader>		vertex_shader;
 	ObjectManager<ID3D11PixelShader>		pixel_shader;
 private:
-	ObjectManager<ID3D11Buffer>				vertex_shader_buffer;
+	ObjectManager<ID3D11Buffer>				vertex_shader_transform_buffer;
+	ObjectManager<ID3D11Buffer>				vertex_shader_surface_size_buffer;
 	ObjectManager<ID3D11Buffer>				index_buffer;
-private:
-	const float half_window_width;
-	const float half_window_height;
 public:
-	CoreEngine(unsigned int width , unsigned int height);
+	CoreEngine();
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
 public:
