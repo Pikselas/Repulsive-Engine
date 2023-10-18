@@ -3,9 +3,16 @@
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
-	StandardWindow window("Repulsive Engine");
+
+	constexpr unsigned int width = 800;
+	constexpr unsigned int height = 600;
+
+	CoreEngine engine(800 , 600);
+	StandardWindow window("Repulsive Engine" , width , height);
 	window.SetIcon(R"(C:\Users\Aritra Maji\Downloads\logo.ico)");
-	CoreEngine engine(window);
+
+	auto renderer = engine.CreateRenderer(window);
+	engine.SetRenderer(renderer);
 
 	auto sprite = engine.CreateSprite(Image(R"(C:\Users\Aritra Maji\Downloads\_5bb8c433-5b5c-42f1-8a31-4fc3a6b81f2d.jpg)"));
 
@@ -14,10 +21,10 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	while (window.IsOpen())
 	{
-		engine.ClearFrame();
+		engine.ClearFrame(renderer);
 		sprite.Draw(engine);
-		engine.RenderFrame();
-		
+		renderer.RenderFrame();
+
 		Window::DispatchWindowEventsNonBlocking();
 	}
 	return 0;

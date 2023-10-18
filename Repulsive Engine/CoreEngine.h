@@ -6,6 +6,7 @@
 #include"Image.h"
 #include"ImageSprite.h"
 #include"CustomWindow.h"
+#include"WindowRenderer.h"
 
 #include "Engine.h"
 
@@ -30,8 +31,6 @@ private:
 private:
 	ObjectManager<ID3D11Device>				graphics_device;
 	ObjectManager<ID3D11DeviceContext>		device_context;
-	ObjectManager<IDXGISwapChain>			swap_chain;
-	ObjectManager<ID3D11RenderTargetView>	render_target_view;
 private:
 	ObjectManager<ID3D11InputLayout>		input_layout;
 private:
@@ -44,7 +43,7 @@ private:
 	const float half_window_width;
 	const float half_window_height;
 public:
-	CoreEngine(CustomWindow& window);
+	CoreEngine(unsigned int width , unsigned int height);
 private:
 	ObjectManager<ID3D11SamplerState>		SAMPLER_STATE;
 public:
@@ -53,9 +52,12 @@ public:
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
 	ImageSprite CreateSprite(const Image& image);
+	WindowRenderer CreateRenderer(CustomWindow& window);
+public:
+	void SetRenderer(const RenderDevice& render_device);
 public:
 	void Draw() override;
 public:
-	void ClearFrame();
-	void RenderFrame();
+	void ClearFrame(const RenderDevice& render_device);
+	void Dummy();
 };

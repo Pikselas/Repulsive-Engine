@@ -1,48 +1,20 @@
 #include "CoreEngine.h"
 
-CoreEngine::CoreEngine(CustomWindow& window) 
+CoreEngine::CoreEngine(unsigned int width, unsigned int height)
 	:
 
-half_window_width((float)window.GetWidth() / 2) , half_window_height((float)window.GetHeight() / 2)
+half_window_width((float)width / 2) , half_window_height((float)height / 2)
 {
-	ObjectManager<ID3D11Resource> BackBuffer;
-	DXGI_SWAP_CHAIN_DESC sd = { 0 };
-	sd.BufferDesc.Width = 0;												// look at the window and use it's size
-	sd.BufferDesc.Height = 0;
-	sd.BufferDesc.RefreshRate.Numerator = 0;								// pick the default refresh rates
-	sd.BufferDesc.RefreshRate.Denominator = 0;
-	sd.BufferCount = 1;														// one back buffer -> one back and one front (double buffering)
-	sd.BufferDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;						// this is the color format (BGRA) 
-	sd.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;					// not specifying any scaling because we want the renedred frame same as window size
-	sd.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;	// how buffer scaning will be done for copying all to video memory
-	sd.Flags = 0;															// not setting any flags
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;						// use the buffer for render target
-	sd.OutputWindow = window.window_handle;									// set the window handle
-	sd.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;								// discard the effects for swapping frames
-	sd.Windowed = TRUE;
-
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-
-	// create the device, swap chain and device context
-	if (auto hrcode = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &sd, &swap_chain, &graphics_device, nullptr, &device_context); FAILED(hrcode))
-	{
-		throw hrcode;
-	}
-
-	// get the back buffer of the swap chain and use as a render target view
-	swap_chain->GetBuffer(0, __uuidof(ID3D11Resource), &BackBuffer);
-	graphics_device->CreateRenderTargetView(BackBuffer.Get(), nullptr, &render_target_view);
-	device_context->OMSetRenderTargets(1u, render_target_view.GetAddressOf(), nullptr);
+	D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0, nullptr, 0, D3D11_SDK_VERSION, &graphics_device, nullptr, &device_context);
 
 	// create the viewport
 	D3D11_VIEWPORT viewport = {};
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = window.GetWidth();		//screen height
-	viewport.Height = window.GetHeight();	// screen width
-	viewport.MaxDepth = 1;					// maximum depth for z axis
-	viewport.MinDepth = 0;					// minimum depth for z axis
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MaxDepth = 1;	// maximum depth for z axis
+	viewport.MinDepth = 0;	// minimum depth for z axis
 	device_context->RSSetViewports(1u, &viewport);
 
 	// set the primitive topology
@@ -195,6 +167,17 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 	return sprite;
 }
 
+WindowRenderer CoreEngine::CreateRenderer(CustomWindow& window)
+{
+	return WindowRenderer(graphics_device.Get(), window.window_handle);
+}
+
+void CoreEngine::SetRenderer(const RenderDevice& render_device)
+{
+	auto render_target_view = render_device.GetTarget();
+	device_context->OMSetRenderTargets(1u,&render_target_view, nullptr);
+}
+
 void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
 {
 	device_context->PSSetShaderResources(0u, 1u, &texture_view);
@@ -205,13 +188,41 @@ void CoreEngine::Draw()
 	device_context->DrawIndexed(6, 0u, 0u);
 }
 
-void CoreEngine::ClearFrame()
+void CoreEngine::ClearFrame(const RenderDevice& render_device)
 {
 	constexpr float color[] = { 0.0f,0.0f,0.0f,1.0f };
-	device_context->ClearRenderTargetView(render_target_view.Get(), color);
+	device_context->ClearRenderTargetView(render_device.GetTarget(), color);
 }
 
-void CoreEngine::RenderFrame()
+void CoreEngine::Dummy()
 {
-	swap_chain->Present(1u, 0u);
+	D3D11_TEXTURE2D_DESC desc = { 0 };
+	desc.Width = 800;
+	desc.Height = 600;
+	desc.MipLevels = 1;
+	desc.ArraySize = 1;
+	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	desc.SampleDesc.Count = 1;
+	desc.Usage = D3D11_USAGE_DEFAULT;
+	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	desc.CPUAccessFlags = 0;
+	desc.MiscFlags = 0;
+
+	ObjectManager<ID3D11Texture2D> dummy_texture;
+
+	graphics_device->CreateTexture2D(&desc, nullptr , &dummy_texture);
+
+	ObjectManager<ID3D11RenderTargetView> texture_render_target_view;
+
+	graphics_device->CreateRenderTargetView(dummy_texture.Get(), nullptr, &texture_render_target_view);
+
+	device_context->OMSetRenderTargets(1u, texture_render_target_view.GetAddressOf(), nullptr);
+
+	device_context->DrawIndexed(6, 0u, 0u);
+
+	ObjectManager<ID3D11Resource> back_buffer = nullptr;
+	//swap_chain->GetBuffer(0, __uuidof(ID3D11Resource), &back_buffer);
+
+	device_context->CopyResource(back_buffer.Get(), dummy_texture.Get());
+	//device_context->OMSetRenderTargets(1u, render_target_view.GetAddressOf(), nullptr);
 }
