@@ -38,7 +38,7 @@ private:
 		CreateTarget(device, BackBuffer.Get());
 	}
 public:
-	void RenderFrame()
+	void RenderFrame() override
 	{
 		swap_chain->Present(1u, 0u);
 	}

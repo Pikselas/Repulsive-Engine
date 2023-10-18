@@ -3,9 +3,9 @@
 #include<D3DCompiler.h>
 #pragma comment(lib,"D3DCompiler.lib")
 
-#include"Image.h"
 #include"ImageSprite.h"
 #include"CustomWindow.h"
+#include"MemoryRenderer.h"
 #include"WindowRenderer.h"
 
 #include "Engine.h"
@@ -43,6 +43,7 @@ public:
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
 	ImageSprite CreateSprite(const Image& image);
+	MemoryRenderer CreateRenderer(Image& image);
 	WindowRenderer CreateRenderer(CustomWindow& window);
 public:
 	void SetRenderer(const RenderDevice& render_device);

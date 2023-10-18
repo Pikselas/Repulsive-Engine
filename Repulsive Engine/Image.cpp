@@ -56,12 +56,22 @@ void Image::Clear(ColorType color)
 	graphics.Clear(Gdiplus::Color(color.a,color.r,color.g,color.b));
 }
 
+ColorType* Image::Raw()
+{
+	Gdiplus::BitmapData data;
+	auto bitmapPtr = bitmap.get();
+	Gdiplus::Rect rect(0, 0, bitmap->GetWidth(), bitmap->GetHeight());
+	bitmapPtr->LockBits(&rect, Gdiplus::ImageLockModeWrite, PixelFormat32bppARGB , &data);
+	bitmapPtr->UnlockBits(&data);
+	return static_cast<ColorType*>(data.Scan0);
+}
+
 const ColorType* Image::Raw() const
 {
 	Gdiplus::BitmapData data;
-	auto bitmapPtr = const_cast<Gdiplus::Bitmap*>(bitmap.get());
+	auto bitmapPtr = bitmap.get();
 	Gdiplus::Rect rect(0, 0, bitmap->GetWidth(), bitmap->GetHeight());
-	bitmapPtr->LockBits(&rect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB , &data);
+	bitmapPtr->LockBits(&rect, Gdiplus::ImageLockModeRead, PixelFormat32bppARGB, &data);
 	bitmapPtr->UnlockBits(&data);
 	return static_cast<ColorType*>(data.Scan0);
 }
