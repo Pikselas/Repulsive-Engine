@@ -1,5 +1,7 @@
 #include "Image.h"
 
+GDIPlusManager Image::manager;
+
 Image::Image(const std::filesystem::path& file) : bitmap(std::make_unique<Gdiplus::Bitmap>(file.c_str()))
 {
 	if (bitmap->GetLastStatus() != Gdiplus::Status::Ok)

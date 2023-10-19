@@ -15,7 +15,7 @@ struct ColorType
 class Image
 {
 private:
-	GDIPlusManager manager;
+	static GDIPlusManager manager;
 	std::unique_ptr<Gdiplus::Bitmap> bitmap;
 public:
 	Image(const std::filesystem::path& file);
