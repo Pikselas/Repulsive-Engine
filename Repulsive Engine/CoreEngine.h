@@ -51,5 +51,4 @@ public:
 	void Draw() override;
 public:
 	void ClearFrame(const RenderDevice& render_device);
-	void Dummy();
 };

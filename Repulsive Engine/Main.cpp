@@ -4,34 +4,42 @@
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	CoreEngine engine;
-	StandardWindow window("Repulsive Engine");
-	window.SetIcon(R"(C:\Users\Aritra Maji\Downloads\logo.ico)");
-	Image image(window.GetWidth(), window.GetHeight());
 
-	auto renderer_window = engine.CreateRenderer(window);
-	auto renderer_memory = engine.CreateRenderer(image);
+	auto ship	= engine.CreateSprite(Image("Media/ship.png"));
+	auto tree_1 = engine.CreateSprite(Image("Media/tree_1.png"));
+	auto tree_2 = engine.CreateSprite(Image("Media/tree_2.png"));
+	auto tree_3 = engine.CreateSprite(Image("Media/tree_3.png"));
 
-	//Image prt(R"(C:\Users\Aritra Maji\Downloads\_5bb8c433-5b5c-42f1-8a31-4fc3a6b81f2d.jpg)");
-	//prt.Save("media/shot.jpg");
+	Image image_target(800, 600);
+	StandardWindow window("Repulsive Engine" , 800 , 600);
+	window.SetIcon("Media/logo.ico");
 
-	auto sprite = engine.CreateSprite(Image(R"(C:\Users\Aritra Maji\Downloads\_5bb8c433-5b5c-42f1-8a31-4fc3a6b81f2d.jpg)"));
+	auto image_renderer	 = engine.CreateRenderer(image_target);
+	auto window_renderer = engine.CreateRenderer(window);
 
-	sprite.SetTransformation(DirectX::XMMatrixScaling(0.5f , 0.5f , 0.0f));
-	sprite.SetPosition(DirectX::XMVectorSet(window.GetWidth() / 2, window.GetHeight() / 2, 0.0f, 1.0f));
+	ship.SetPosition(DirectX::XMVectorSet(400 , 300 , 0 , 1));
+	tree_1.SetPosition(DirectX::XMVectorSet(100 , 100 , 0 , 1));
+	tree_2.SetPosition(DirectX::XMVectorSet(700 , 100 , 0 , 1));
+	tree_3.SetPosition(DirectX::XMVectorSet(400 , 500 , 0 , 1));
 
-	engine.SetRenderer(renderer_memory);
-	sprite.Draw(engine);
+	engine.SetRenderer(image_renderer);
 
-	renderer_memory.RenderFrame();
+	ship.Draw(engine);
+	tree_1.Draw(engine);
+	tree_2.Draw(engine);
+	tree_3.Draw(engine);
 
-	image.Save("media/file.png");
+	window_renderer.CopyFrame(image_renderer);
+	window_renderer.RenderFrame();
 
-	//renderer_window.CopyFrame(renderer_memory);
-	//renderer_window.RenderFrame();
+	image_target.Clear();
+	image_renderer.RenderFrame();
+	image_target.Save("Media/RENDERED.png");
 
 	while (window.IsOpen())
 	{
-		Window::DispatchWindowEventsNonBlocking();
+		Window::DispatchWindowEvents();
 	}
+
 	return 0;
 }

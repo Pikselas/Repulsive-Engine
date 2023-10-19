@@ -27,11 +27,7 @@ private:
 		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 		desc.MiscFlags = 0;
 
-		auto h = device->CreateTexture2D(&desc, nullptr, &memory_data);
-
-		if(FAILED(h))
-			MessageBox(nullptr, "Failed to create memory data", "Error", MB_OK);
-
+		device->CreateTexture2D(&desc, nullptr, &memory_data);
 		CreateTarget(device, memory_data.Get());
 	}
 public:
@@ -57,25 +53,12 @@ public:
 		desc.MiscFlags = 0;
 
 		Microsoft::WRL::ComPtr<ID3D11Texture2D> read_texture;
-		auto h = device->CreateTexture2D(&desc, nullptr, &read_texture);
-
-		if (FAILED(h))
-		{
-			MessageBox(nullptr, "Failed to create read texture", "Error", MB_OK);
-		}
-
+		device->CreateTexture2D(&desc, nullptr, &read_texture);
 		device_context->CopyResource(read_texture.Get(), memory_data.Get());
 
 		D3D11_MAPPED_SUBRESOURCE mapped_resource;
-		h = device_context->Map(read_texture.Get(), 0, D3D11_MAP_READ, 0, & mapped_resource);
-
-		if (FAILED(h))
-		{
-			MessageBox(nullptr, "Failed to map memory data", "Error", MB_OK);
-		}
-
+		device_context->Map(read_texture.Get(), 0, D3D11_MAP_READ, 0, & mapped_resource);
 		std::memcpy(surface.Raw(), mapped_resource.pData ,sizeof(ColorType) * surface.GetWidth() * surface.GetHeight());
-		
 		device_context->Unmap(read_texture.Get(), 0);
 	}
 };

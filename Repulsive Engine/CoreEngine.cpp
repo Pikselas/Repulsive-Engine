@@ -55,7 +55,7 @@ CoreEngine::CoreEngine()
 	blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;					// uses the inverse of the alpha channel of the source pixel as the blend factor
 	blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;								// adds the source and destination blend factors
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;							// it is fully opaque
-	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;						// it is fully transparent
+	blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;		// enables all the color channels for writing
 
@@ -208,37 +208,4 @@ void CoreEngine::ClearFrame(const RenderDevice& render_device)
 {
 	constexpr float color[] = { 0.0f,0.0f,0.0f,1.0f };
 	device_context->ClearRenderTargetView(render_device.GetTarget(), color);
-}
-
-void CoreEngine::Dummy()
-{
-	D3D11_TEXTURE2D_DESC desc = { 0 };
-	desc.Width = 800;
-	desc.Height = 600;
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	desc.SampleDesc.Count = 1;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-
-	ObjectManager<ID3D11Texture2D> dummy_texture;
-
-	graphics_device->CreateTexture2D(&desc, nullptr , &dummy_texture);
-
-	ObjectManager<ID3D11RenderTargetView> texture_render_target_view;
-
-	graphics_device->CreateRenderTargetView(dummy_texture.Get(), nullptr, &texture_render_target_view);
-
-	device_context->OMSetRenderTargets(1u, texture_render_target_view.GetAddressOf(), nullptr);
-
-	device_context->DrawIndexed(6, 0u, 0u);
-
-	ObjectManager<ID3D11Resource> back_buffer = nullptr;
-	//swap_chain->GetBuffer(0, __uuidof(ID3D11Resource), &back_buffer);
-
-	device_context->CopyResource(back_buffer.Get(), dummy_texture.Get());
-	//device_context->OMSetRenderTargets(1u, render_target_view.GetAddressOf(), nullptr);
 }
