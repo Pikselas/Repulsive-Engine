@@ -83,3 +83,42 @@ Image& Image::operator=(const Image& img)
 	graphics.DrawImage(img.bitmap.get(), 0, 0, img.GetWidth(), img.GetHeight());
 	return *this;
 }
+
+void Image::Save(const std::filesystem::path& file) const
+{
+	CLSID Clsid;
+	HRESULT hResult;
+	
+	if (auto ext = file.extension(); ext == "png")
+	{
+		hResult = CLSIDFromString(L"{557CF406-1A04-11D3-9A73-0000F81EF32E}", &Clsid);
+	}
+	else if (ext == "jpg" || ext == "jpeg")
+	{
+		hResult = CLSIDFromString(L"{557CF401-1A04-11D3-9A73-0000F81EF32E}", &Clsid);
+	}
+	else if (ext == "bmp")
+	{
+		hResult = CLSIDFromString(L"{557CF400-1A04-11D3-9A73-0000F81EF32E}", &Clsid);
+	}
+	else if (ext == "tif")
+	{
+		hResult = CLSIDFromString(L"{557CF405-1A04-11D3-9A73-0000F81EF32E}", &Clsid);
+	}
+	else
+	{
+		throw std::runtime_error("Invalid file extension");
+	}
+
+	if (FAILED(hResult))
+	{
+		throw std::runtime_error("Failed to get Encoder");
+	}
+
+	auto status = bitmap->Save(file.wstring().c_str(),&Clsid);
+
+	if (status != Gdiplus::Status::Ok)
+	{
+		throw std::runtime_error("Failed to save image");
+	}
+}

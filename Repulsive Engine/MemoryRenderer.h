@@ -7,14 +7,12 @@ class MemoryRenderer : public RenderDevice
 	friend class CoreEngine;
 private:
 	Image& surface;
-	ID3D11DeviceContext* context;
 private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> memory_data;
 private:
-	MemoryRenderer(ID3D11Device* device,ID3D11DeviceContext* context, Image& surface)
+	MemoryRenderer(ID3D11Device* device, Image& surface)
 		:
 		surface(surface),
-		context(context),
 		RenderDevice(surface.GetWidth() , surface.GetHeight())
 	{
 		D3D11_TEXTURE2D_DESC desc = { 0 };
@@ -39,14 +37,37 @@ private:
 public:
 	void RenderFrame() override
 	{
-		//ID3D11Device* device;
-		//ID3D11DeviceContext* device_context;
-		D3D11_MAPPED_SUBRESOURCE mapped_resource = {};
+		Microsoft::WRL::ComPtr<ID3D11Device> device;
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> device_context;
 		
-		//memory_data->GetDevice(&device);
-		//device->GetImmediateContext(&device_context);
+		memory_data->GetDevice(&device);
+		device->GetImmediateContext(&device_context);
 
-		auto h = context->Map(memory_data.Get(), 0, D3D11_MAP_READ , 0, &mapped_resource);
+		// create texture for reading
+		D3D11_TEXTURE2D_DESC desc = { 0 };
+		desc.Width = surface.GetWidth();
+		desc.Height = surface.GetHeight();
+		desc.MipLevels = 1;
+		desc.ArraySize = 1;
+		desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		desc.SampleDesc.Count = 1;
+		desc.Usage = D3D11_USAGE_STAGING;
+		desc.BindFlags = 0;
+		desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		desc.MiscFlags = 0;
+
+		Microsoft::WRL::ComPtr<ID3D11Texture2D> read_texture;
+		auto h = device->CreateTexture2D(&desc, nullptr, &read_texture);
+
+		if (FAILED(h))
+		{
+			MessageBox(nullptr, "Failed to create read texture", "Error", MB_OK);
+		}
+
+		device_context->CopyResource(read_texture.Get(), memory_data.Get());
+
+		D3D11_MAPPED_SUBRESOURCE mapped_resource;
+		h = device_context->Map(read_texture.Get(), 0, D3D11_MAP_READ, 0, & mapped_resource);
 
 		if (FAILED(h))
 		{
@@ -55,6 +76,6 @@ public:
 
 		std::memcpy(surface.Raw(), mapped_resource.pData ,sizeof(ColorType) * surface.GetWidth() * surface.GetHeight());
 		
-		context->Unmap(memory_data.Get(), 0);
+		device_context->Unmap(read_texture.Get(), 0);
 	}
 };

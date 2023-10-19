@@ -31,4 +31,5 @@ public:
 	const ColorType* Raw() const;
 public:
 	Image& operator=(const Image& img);
+	void Save(const std::filesystem::path& file) const;
 };

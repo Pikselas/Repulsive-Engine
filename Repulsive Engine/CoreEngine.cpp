@@ -161,7 +161,7 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 
 MemoryRenderer CoreEngine::CreateRenderer(Image& image)
 {
-	return MemoryRenderer(graphics_device.Get(), device_context.Get(), image);
+	return MemoryRenderer(graphics_device.Get(), image);
 }
 
 WindowRenderer CoreEngine::CreateRenderer(CustomWindow& window)
