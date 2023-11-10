@@ -65,7 +65,7 @@
     <ClInclude Include="CoreEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Engine.h">
+    <ClInclude Include="RenderCommandEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RenderDevice.h">

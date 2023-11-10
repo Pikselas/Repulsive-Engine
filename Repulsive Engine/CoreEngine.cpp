@@ -169,31 +169,6 @@ WindowRenderer CoreEngine::CreateRenderer(CustomWindow& window)
 	return WindowRenderer(graphics_device.Get(), window.window_handle , window.GetWidth() , window.GetHeight());
 }
 
-void CoreEngine::SetRenderer(const RenderDevice& render_device)
-{
-	// create and set the viewport
-	D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = render_device.width;
-	viewport.Height = render_device.height;
-	viewport.MaxDepth = 1;	// maximum depth for z axis
-	viewport.MinDepth = 0;	// minimum depth for z axis
-	
-	device_context->RSSetViewports(1u, &viewport);
-
-	const float surface_size[] = { static_cast<float>(render_device.width) / 2 , static_cast<float>(render_device.height) / 2 };
-
-	// update the surface size in vertex shader
-	D3D11_MAPPED_SUBRESOURCE ms;
-	device_context->Map(vertex_shader_surface_size_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
-	std::memcpy(ms.pData, surface_size, sizeof(float) * std::size(surface_size));
-	device_context->Unmap(vertex_shader_surface_size_buffer.Get(), 0u);
-
-	auto render_target_view = render_device.GetTarget();
-	device_context->OMSetRenderTargets(1u,&render_target_view, nullptr);
-}
-
 void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
 {
 	device_context->PSSetShaderResources(0u, 1u, &texture_view);
@@ -202,10 +177,4 @@ void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
 void CoreEngine::Draw()
 {
 	device_context->DrawIndexed(6, 0u, 0u);
-}
-
-void CoreEngine::ClearFrame(const RenderDevice& render_device)
-{
-	constexpr float color[] = { 0.0f,0.0f,0.0f,1.0f };
-	device_context->ClearRenderTargetView(render_device.GetTarget(), color);
 }

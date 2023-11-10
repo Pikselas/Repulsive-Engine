@@ -4,7 +4,7 @@
 
 class RenderDevice
 {
-	friend class CoreEngine;
+	friend class RenderCommandEngine;
 private:
 	const unsigned int width;
 	const unsigned int height;
