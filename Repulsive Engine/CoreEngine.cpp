@@ -159,6 +159,19 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 	return sprite;
 }
 
+AnimatedSprite CoreEngine::CreateSprite(const std::vector<Image>& frames, std::chrono::milliseconds duration)
+{
+	std::vector<ImageSprite> sprites;
+	sprites.reserve(frames.size());
+
+	for (const auto& frame : frames)
+	{
+		sprites.push_back(CreateSprite(frame));
+	}
+
+	return AnimatedSprite(sprites, duration);
+}
+
 MemoryRenderer CoreEngine::CreateRenderer(Image& image)
 {
 	return MemoryRenderer(graphics_device.Get(), image);

@@ -24,7 +24,7 @@ public:
 public:
 	void ClearFrame(const RenderDevice& render_device)
 	{
-		device_context->ClearRenderTargetView(render_device.GetTarget(),DirectX::Colors::Black);
+		device_context->ClearRenderTargetView(render_device.GetTarget(),DirectX::Colors::White);
 	}
 	void SetRenderDevice(const RenderDevice& render_device)
 	{

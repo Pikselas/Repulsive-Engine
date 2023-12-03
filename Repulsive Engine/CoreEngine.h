@@ -3,10 +3,10 @@
 #include<D3DCompiler.h>
 #pragma comment(lib,"D3DCompiler.lib")
 
-#include"ImageSprite.h"
 #include"CustomWindow.h"
 #include"MemoryRenderer.h"
 #include"WindowRenderer.h"
+#include"AnimatedSprite.h"
 
 #include "RenderCommandEngine.h"
 
@@ -41,6 +41,8 @@ public:
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
 	ImageSprite CreateSprite(const Image& image);
+	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration);
+public:
 	MemoryRenderer CreateRenderer(Image& image);
 	WindowRenderer CreateRenderer(CustomWindow& window);
 public:
