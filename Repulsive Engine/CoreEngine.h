@@ -41,7 +41,7 @@ public:
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
 	ImageSprite CreateSprite(const Image& image);
-	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration);
+	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration , std::optional<unsigned int> repeat_count = std::nullopt);
 public:
 	MemoryRenderer CreateRenderer(Image& image);
 	WindowRenderer CreateRenderer(CustomWindow& window);

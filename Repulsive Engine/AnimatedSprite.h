@@ -12,18 +12,33 @@ private:
 private:
 	std::chrono::milliseconds per_frame_duration;
 	mutable std::optional<std::chrono::steady_clock::time_point> last_draw_time;
+private:
+	mutable std::optional<unsigned int> repeat_count;
 public:
-	AnimatedSprite(const std::vector<ImageSprite>& frames, std::chrono::milliseconds duration)
-		: frames(frames), per_frame_duration(duration / frames.size())
+	AnimatedSprite(const std::vector<ImageSprite>& frames, std::chrono::milliseconds duration, std::optional<unsigned int> repeat = {})
+		: frames(frames), per_frame_duration(duration / frames.size()), repeat_count(repeat)
 	{}
 public:
+	void SetRepeatCount(unsigned int count)
+	{
+		repeat_count = count;
+	}
+	void SetInfiniteRepetition()
+	{
+		repeat_count = std::nullopt;
+	}
 	void SetDuration(std::chrono::milliseconds duration)
 	{
 		per_frame_duration = duration / frames.size();
 	}
+	bool IsStopped() const
+	{
+		return repeat_count ? (*repeat_count != 0 ? false : true) : false;
+	}
 private:
 	unsigned int GetFrameIndex() const
-	{
+	{	
+
 		if (last_draw_time)
 		{
 			auto now = std::chrono::steady_clock::now();
@@ -34,7 +49,22 @@ private:
 				current_frame += elapsed.count() / per_frame_duration.count();
 				if (current_frame >= frames.size())
 				{
-					current_frame = 0;
+					if (repeat_count)
+					{
+						if (*repeat_count != 0)
+						{
+							(*repeat_count)--;
+							current_frame = 0;
+						}
+						else
+						{
+							current_frame = frames.size() - 1;
+						}
+					}
+					else
+					{
+						current_frame = 0;
+					}
 				}
 			}
 		}
@@ -42,6 +72,7 @@ private:
 		{
 			last_draw_time = std::chrono::steady_clock::now();
 		}
+
 		return current_frame;
 	}
 public:

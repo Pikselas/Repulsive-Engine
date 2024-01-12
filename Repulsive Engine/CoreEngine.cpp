@@ -159,7 +159,7 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 	return sprite;
 }
 
-AnimatedSprite CoreEngine::CreateSprite(const std::vector<Image>& frames, std::chrono::milliseconds duration)
+AnimatedSprite CoreEngine::CreateSprite(const std::vector<Image>& frames, std::chrono::milliseconds duration, std::optional<unsigned int> repeat_count)
 {
 	std::vector<ImageSprite> sprites;
 	sprites.reserve(frames.size());
@@ -169,7 +169,7 @@ AnimatedSprite CoreEngine::CreateSprite(const std::vector<Image>& frames, std::c
 		sprites.push_back(CreateSprite(frame));
 	}
 
-	return AnimatedSprite(sprites, duration);
+	return AnimatedSprite(sprites, duration , repeat_count);
 }
 
 MemoryRenderer CoreEngine::CreateRenderer(Image& image)
