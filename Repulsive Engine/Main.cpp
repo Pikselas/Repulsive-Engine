@@ -80,9 +80,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	InGUI gui(engine);
 	gui.CaptureEvents(window.mouse);
 
-	auto sprt = engine.CreateSprite(Image("D:/wallpaperflare-cropped.jpg"));
+	auto sprt = engine.CreateSprite(engine.CreateTexture(Image("D:/wallpaperflare-cropped.jpg")) , 100 , 100);
 
 	sprt.SetPosition(DirectX::XMVectorSet(250, 250, 0, 1));
+
+	float x = 0;
+
+	window.keyboard.OnKeyPress = [&](StandardWindow::KeyBoard::EventT ev) 
+		{
+			if (ev.KEY_CODE == 'W')
+			{
+				x += 0.005;
+				sprt.SetTextureCoord(x , x);
+			}
+		};
 
 	while (window.IsOpen())
 	{

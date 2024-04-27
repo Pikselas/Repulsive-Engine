@@ -105,6 +105,11 @@ void CoreEngine::SetComponent(ID3D11Buffer* vertices)
 	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride , &offset);
 }
 
+Texture CoreEngine::CreateTexture(const Image& image)
+{
+	return Texture{ graphics_device.Get() , image };
+}
+
 void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view , std::pair<float, float> coord , std::pair<float, float> size)
 {
 	device_context->PSSetShaderResources(0u, 1u, &texture_view);
@@ -119,8 +124,13 @@ void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view , std::pair
 
 ImageSprite CoreEngine::CreateSprite(const Image& image)
 {
-	const float x_ = image.GetWidth() * 0.5;
-	const float y_ = -(image.GetHeight() * 0.5);
+	return CreateSprite(CreateTexture(image), image.GetWidth(), image.GetHeight());
+}
+
+ImageSprite CoreEngine::CreateSprite(Texture texture , unsigned int width , unsigned int height)
+{
+	const float x_ = width * 0.5;
+	const float y_ = -(height * 0.5);
 
 	VertexType Vertices[] =
 	{
@@ -132,11 +142,13 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 
 	ImageSprite sprite;
 
-	sprite.width = image.GetWidth();
-	sprite.height = image.GetHeight();
+	sprite.width = width;
+	sprite.height = height;
 
 	sprite.SetTextureCoord(0, 0);
-	sprite.SetTextureSize(1.0f, 1.0f);
+	sprite.SetTextureSize((float)width / texture.GetWidth(), (float)height / texture.GetHeight());
+
+	sprite.texture = texture;
 
 	// create vertex buffer
 	D3D11_BUFFER_DESC bd = { 0 };
@@ -151,29 +163,6 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 	subd.pSysMem = Vertices;
 
 	graphics_device->CreateBuffer(&bd, &subd, &sprite.vertex_buffer);
-
-	// create texture data
-	D3D11_TEXTURE2D_DESC desc = {};
-	desc.Width = image.GetWidth();
-	desc.Height = image.GetHeight();
-	desc.MipLevels = 1;
-	desc.ArraySize = 1;
-	desc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-	desc.SampleDesc.Count = 1;
-	desc.Usage = D3D11_USAGE_DEFAULT;
-	desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	desc.CPUAccessFlags = 0;
-	desc.MiscFlags = 0;
-	D3D11_SUBRESOURCE_DATA subresource_data = {};
-
-	auto data = image.Raw();
-	subresource_data.pSysMem = data;
-	subresource_data.SysMemPitch = sizeof(*data) * image.GetWidth();
-
-	subresource_data.SysMemSlicePitch = 0;
-
-	graphics_device->CreateTexture2D(&desc, &subresource_data, &sprite.TEXTURE);
-	graphics_device->CreateShaderResourceView(sprite.TEXTURE.Get(), nullptr, &sprite.TEXTURE_VIEW);
 
 	return sprite;
 }

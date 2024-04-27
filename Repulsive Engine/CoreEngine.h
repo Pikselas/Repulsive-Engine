@@ -40,7 +40,10 @@ public:
 	void SetComponent(ID3D11ShaderResourceView* texture_view, std::pair<float, float> coord, std::pair<float, float> size) override;
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
+	Texture CreateTexture(const Image& image);
+public:
 	ImageSprite CreateSprite(const Image& image);
+	ImageSprite CreateSprite(Texture texture, unsigned int width , unsigned int height);
 	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration , std::optional<unsigned int> repeat_count = std::nullopt);
 public:
 	MemoryRenderer CreateRenderer(Image& image);
