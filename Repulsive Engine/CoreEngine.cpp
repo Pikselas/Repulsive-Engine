@@ -22,11 +22,12 @@ CoreEngine::CoreEngine()
 
 	D3D11_INPUT_ELEMENT_DESC ied[] = 
 	{
-		{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0},
-		{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,sizeof(float) * 2,D3D11_INPUT_PER_VERTEX_DATA,0},
+		{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0}
 	};
 
-	graphics_device->CreateInputLayout(ied, 2, shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
+	//{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,sizeof(float) * 2,D3D11_INPUT_PER_VERTEX_DATA,0},
+
+	graphics_device->CreateInputLayout(ied, std::size(ied), shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
 	device_context->IASetInputLayout(input_layout.Get());
 
 	D3DReadFileToBlob(pixel_shader_path.c_str(), &shader_buffer);
@@ -45,8 +46,11 @@ CoreEngine::CoreEngine()
 	// minimum constant buffer size is 16 bytes (multiple of 16)
 	bd.ByteWidth = sizeof(float) * 2 < 16 ? 16 : sizeof(float) * 2;
 	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_surface_size_buffer);
-	
-	ID3D11Buffer* const shader_buffers[] = { vertex_shader_transform_buffer.Get() , vertex_shader_surface_size_buffer.Get() };
+
+	bd.ByteWidth = sizeof(float) * 4;
+	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_texture_coord_buffer);
+
+	ID3D11Buffer* const shader_buffers[] = { vertex_shader_transform_buffer.Get() , vertex_shader_surface_size_buffer.Get() ,vertex_shader_texture_coord_buffer.Get() };
 	device_context->VSSetConstantBuffers(0u, std::size(shader_buffers), shader_buffers);
 
 	D3D11_BLEND_DESC blendDesc = {};
@@ -101,6 +105,18 @@ void CoreEngine::SetComponent(ID3D11Buffer* vertices)
 	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride , &offset);
 }
 
+void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view , std::pair<float, float> coord , std::pair<float, float> size)
+{
+	device_context->PSSetShaderResources(0u, 1u, &texture_view);
+
+	const std::pair<float, float> c_data[] = { coord , size };
+
+	D3D11_MAPPED_SUBRESOURCE ms;
+	device_context->Map(vertex_shader_texture_coord_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
+	std::memcpy(ms.pData, c_data, sizeof(c_data));
+	device_context->Unmap(vertex_shader_texture_coord_buffer.Get(), 0u);
+}
+
 ImageSprite CoreEngine::CreateSprite(const Image& image)
 {
 	const float x_ = image.GetWidth() * 0.5;
@@ -108,16 +124,19 @@ ImageSprite CoreEngine::CreateSprite(const Image& image)
 
 	VertexType Vertices[] =
 	{
-		{ -x_ , y_ , 0.0f , 0.0f},
-		{ x_ , y_  , 1.0f , 0.0f},
-		{-x_ , -y_  , 0.0f , 1.0f},
-		{ x_ , -y_  , 1.0f , 1.0f},
+		{ -x_ , y_ },
+		{ x_ , y_  },
+		{-x_ , -y_ },
+		{ x_ , -y_ },
 	};
 
 	ImageSprite sprite;
 
 	sprite.width = image.GetWidth();
 	sprite.height = image.GetHeight();
+
+	sprite.SetTextureCoord(0, 0);
+	sprite.SetTextureSize(1.0f, 1.0f);
 
 	// create vertex buffer
 	D3D11_BUFFER_DESC bd = { 0 };
@@ -180,11 +199,6 @@ MemoryRenderer CoreEngine::CreateRenderer(Image& image)
 WindowRenderer CoreEngine::CreateRenderer(CustomWindow& window)
 {
 	return WindowRenderer(graphics_device.Get(), window.window_handle , window.GetWidth() , window.GetHeight());
-}
-
-void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view)
-{
-	device_context->PSSetShaderResources(0u, 1u, &texture_view);
 }
 
 void CoreEngine::Draw()

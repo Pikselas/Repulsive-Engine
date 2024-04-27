@@ -17,7 +17,7 @@ protected:
 	ObjectManager<ID3D11Buffer> vertex_shader_surface_size_buffer;
 public:
 	virtual void SetComponent(const DirectX::XMMATRIX transformation) = 0;
-	virtual void SetComponent(ID3D11ShaderResourceView* texture_view) = 0;
+	virtual void SetComponent(ID3D11ShaderResourceView* texture_view , std::pair<float,float> coord, std::pair<float, float> size) = 0;
 	virtual void SetComponent(ID3D11Buffer* vertices) = 0;
 public:
 	virtual void Draw() = 0;

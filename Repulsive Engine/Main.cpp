@@ -77,43 +77,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	engine.SetRenderDevice(window_renderer);
 
-	std::vector<Image> images;
-	images.reserve(15);
-
-	for (int i = 1; i <= 7; ++i)
-	{
-		images.emplace_back("D:/blast/" + std::to_string(i) + ".png");
-	}
-
-	using namespace std::chrono_literals;
-
-	auto animated_sprite1 = engine.CreateSprite(images , 350ms , 5);
-	animated_sprite1.SetTransformation(DirectX::XMMatrixScaling(0.2f, 0.2f, 1.0f));
-	animated_sprite1.SetPosition(DirectX::XMVectorSet(200, 300, 0, 1));
-
-	auto animated_sprite2 = animated_sprite1;
-	animated_sprite2.SetInfiniteRepetition();
-	animated_sprite2.SetPosition(DirectX::XMVectorSet(400, 150, 0, 1));
-	animated_sprite2.SetDuration(150ms);
-
-	auto animated_sprite3 = animated_sprite1;
-	animated_sprite3.SetRepeatCount(10);
-	animated_sprite3.SetPosition(DirectX::XMVectorSet(600, 300, 0, 1));
-	animated_sprite3.SetDuration(500ms);
-
-	images.clear();
-
 	InGUI gui(engine);
 	gui.CaptureEvents(window.mouse);
+
+	auto sprt = engine.CreateSprite(Image("D:/wallpaperflare-cropped.jpg"));
+
+	sprt.SetPosition(DirectX::XMVectorSet(250, 250, 0, 1));
 
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
 		gui.Draw();
-		animated_sprite1.Draw(engine);
-		animated_sprite2.Draw(engine);
-		animated_sprite3.Draw(engine);
 		
+		sprt.Draw(engine);
+
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
 	}

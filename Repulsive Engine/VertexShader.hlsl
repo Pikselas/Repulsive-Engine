@@ -16,14 +16,23 @@ cbuffer screen_size
     float2 padding;
 };
 
-VertexShaderOut main(float2 pos : POSITION, float2 tex : TEXCOORD)
+cbuffer texture_coord
+{
+    float2 coord;
+    float2 size;
+};
+
+VertexShaderOut main(float2 pos : POSITION)
 {
     VertexShaderOut Out;
+    
+    Out.tex.x = coord.x + size.x * clamp(sign(pos.x), 0, 1);
+    Out.tex.y = coord.y + size.y * clamp(sign(pos.y), 0, 1);
+    
     pos = mul(transform, float4(pos, 0.0f, 1.0f)).xy;
     pos /= half_screen_size;
     pos.x -= 1.0f;
     pos.y = 1.0f - pos.y;
     Out.pos = float4(pos , 0.0f , 1.0f);
-    Out.tex = tex;
     return Out;
 }
