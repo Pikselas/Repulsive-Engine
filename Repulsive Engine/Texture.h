@@ -10,8 +10,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D>			 TEXTURE;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> TEXTURE_VIEW;
 private:
-	unsigned int width;
-	unsigned int height;
+	unsigned int width = 0;
+	unsigned int height = 0;
 public:
 	Texture() = default;
 	Texture(ID3D11Device* graphics_device , const Image& image) : width(image.GetWidth()) , height(image.GetHeight())

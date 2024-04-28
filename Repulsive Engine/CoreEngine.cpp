@@ -145,10 +145,10 @@ ImageSprite CoreEngine::CreateSprite(Texture texture , unsigned int width , unsi
 	sprite.width = width;
 	sprite.height = height;
 
-	sprite.SetTextureCoord(0, 0);
-	sprite.SetTextureSize((float)width / texture.GetWidth(), (float)height / texture.GetHeight());
-
 	sprite.texture = texture;
+
+	sprite.SetTextureCoord(0, 0);
+	sprite.SetTextureSize(width, height);
 
 	// create vertex buffer
 	D3D11_BUFFER_DESC bd = { 0 };

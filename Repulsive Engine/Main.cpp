@@ -80,27 +80,29 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	InGUI gui(engine);
 	gui.CaptureEvents(window.mouse);
 
-	auto sprt = engine.CreateSprite(engine.CreateTexture(Image("D:/wallpaperflare-cropped.jpg")) , 100 , 100);
+	auto texture = engine.CreateTexture(Image("D:/ASSET/charmap.png"));
 
-	sprt.SetPosition(DirectX::XMVectorSet(250, 250, 0, 1));
+	auto character = engine.CreateSprite(texture , 47 , 47);
+	character.SetTextureCoord(1 , 0);
 
-	float x = 0;
+	window.keyboard.EnableKeyRepeat();
 
-	window.keyboard.OnKeyPress = [&](StandardWindow::KeyBoard::EventT ev) 
+	window.keyboard.OnKeyPress = [& , i = 0 ] (auto ev) mutable
+	{
+		if (ev.KEY_CODE == 'W')
 		{
-			if (ev.KEY_CODE == 'W')
-			{
-				x += 0.005;
-				sprt.SetTextureCoord(x , x);
-			}
-		};
+			i = (i + 1) % 3;
+			character.SetTextureCoord(48 * i, 0);
+		}
+	};
+
+	character.SetPosition(DirectX::XMVectorSet(100, 100, 0, 1));
 
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
-		gui.Draw();
-		
-		sprt.Draw(engine);
+
+		character.Draw(engine);
 
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();

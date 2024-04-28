@@ -34,15 +34,15 @@ public:
 		engine.Draw();
 	}
 public:
-	void SetTextureCoord(float x , float y)
+	void SetTextureCoord(unsigned int x , unsigned int y)
 	{
-		texture_coord_start_x = x;
-		texture_coord_start_y = y;
+		texture_coord_start_x = (float)x / texture.GetWidth();
+		texture_coord_start_y = (float)y / texture.GetHeight();
 	}
-	void SetTextureSize(float width, float height)
+	void SetTextureSize(unsigned int width, unsigned int height)
 	{
-		texture_coord_width = width;
-		texture_coord_height = height;
+		texture_coord_width = (float)width / texture.GetWidth();
+		texture_coord_height = (float)height / texture.GetHeight();
 	}
 public:
 	unsigned int GetWidth() const
