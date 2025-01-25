@@ -23,7 +23,7 @@ void StandardWindow::MainLoop(const StandardWindow* const window , EventDispatch
 
 StandardWindow::StandardWindow(const std::string& Title, unsigned int Width, unsigned int Height , StandardWindow* Parent)
 	:
-CustomWindow(Parent , 0 , Title , WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT , Width , Height )
+CustomWindow(Parent , 0 , Title , WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX | WS_MAXIMIZEBOX, CW_USEDEFAULT, CW_USEDEFAULT , Width , Height )
 {
 	++WindowCount;
 }

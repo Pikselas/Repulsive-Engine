@@ -1,71 +1,11 @@
 #include"CoreEngine.h"
 #include"StandardWindow.h"
+#include <fstream>
+#include <array>
+#include <random>
 
+#include "SpatialHashGrid.h"
 
-class InGUI
-{
-private:
-	CoreEngine& engine;
-private:
-	ImageSprite surface_window;
-private:
-	bool is_dragging = false;
-	unsigned int offset_x = 0;
-	unsigned int offset_y = 0;
-public:
-	InGUI(CoreEngine& engine) : engine(engine)
-	{
-		Image img(250, 250);
-		img.Clear(ColorType{ 250 , 250 , 100 , 150 });
-		surface_window = engine.CreateSprite(img);
-		surface_window.SetPosition(DirectX::XMVectorSet(100, 100, 0, 1));
-	}
-public:
-	void CaptureEvents(CustomWindow::Mouse& mouse)
-	{
-
-		mouse.OnMove = [&](auto&)
-			{
-				auto [x, y] = mouse.GetXY();
-
-				OutputDebugStringA(std::string(is_dragging ? "dragging\n" : "not dragging\n").c_str());
-
-				if (is_dragging)
-				{
-
-					surface_window.SetPosition(DirectX::XMVectorSet(x - offset_x, y - offset_y, 0, 1));
-				}
-			};
-		mouse.OnLeftPress = [&](auto&)
-			{
-				auto [x, y] = mouse.GetXY();
-
-				const int pos_x = DirectX::XMVectorGetX(surface_window.GetPosition());
-				const int pos_y = DirectX::XMVectorGetY(surface_window.GetPosition());
-				const int width = surface_window.GetWidth() / 2;
-				const int height = surface_window.GetHeight() / 2;
-
-				bool x_inside = (x >= pos_x - width && x <= (pos_x + width));
-				bool y_inside = (y >= pos_y - height && y <= (pos_y + height));
-
-				if (x_inside && y_inside)
-				{
-					is_dragging = true;
-					offset_x = x - pos_x;
-					offset_y = y - pos_y;
-				}
-			};
-		mouse.OnLeftRelease = [&](auto&)
-			{
-				is_dragging = false;
-			};
-	}
-public:
-	void Draw()
-	{
-		surface_window.Draw(engine);
-	}
-};
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -74,36 +14,46 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	StandardWindow window("Repulsive Engine" , 800 , 600);
 	window.SetIcon("Media/logo.ico");
 	auto window_renderer = engine.CreateRenderer(window);
-
 	engine.SetRenderDevice(window_renderer);
+	
+	Image scroll_window(400 , 350);
+	scroll_window.Clear({ .b = 100 , .g = 50 , .r = 150 });
+	auto scroll_sp = engine.CreateSprite(scroll_window);
 
-	InGUI gui(engine);
-	gui.CaptureEvents(window.mouse);
+	Image button{ 100 , 50 };
+	button.Clear({ .b = 150 , .g = 100 , .r = 50 });
+	auto bsp = engine.CreateSprite(button);
+	auto bsp2 = bsp;
 
-	auto texture = engine.CreateTexture(Image("D:/ASSET/charmap.png"));
+	bsp.SetPosition(DirectX::XMVectorSet(150, 250, 1, 1));
+	bsp2.SetPosition(DirectX::XMVectorSet(550, 100, 1, 1));
+	scroll_sp.SetPosition(DirectX::XMVectorSet(350, 250, 1, 1));
 
-	auto character = engine.CreateSprite(texture , 47 , 47);
-	character.SetTextureCoord(1 , 0);
+	auto stencil_buffer = engine.CreateStencilBuffer(800, 600);
+	engine.SetStencilBuffer(stencil_buffer);
 
-	window.keyboard.EnableKeyRepeat();
+	auto sheet_pos = DirectX::XMVectorZero();
 
-	window.keyboard.OnKeyPress = [& , i = 0 ] (auto ev) mutable
-	{
-		if (ev.KEY_CODE == 'W')
+	window.mouse.OnWheel = [&](CustomWindow& me) 
 		{
-			i = (i + 1) % 3;
-			character.SetTextureCoord(48 * i, 0);
-		}
-	};
+			int offset = me.mouse.GetWheelDelta();
+			auto pos = DirectX::XMVectorSet(0, offset * 5, 0, 0);
 
-	character.SetPosition(DirectX::XMVectorSet(100, 100, 0, 1));
+			bsp.SetPosition(DirectX::XMVectorAdd(bsp.GetPosition(), pos));
+			bsp2.SetPosition(DirectX::XMVectorAdd(bsp2.GetPosition(), pos));
+		};
 
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
-
-		character.Draw(engine);
-
+		engine.ClearStencilBuffer(stencil_buffer);
+		scroll_sp.Draw(engine);
+		
+		engine.BeginStencilClipping(1);
+		bsp.Draw(engine);
+		bsp2.Draw(engine);
+		engine.EndStencilClipping(1);
+		
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
 	}

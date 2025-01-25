@@ -141,6 +141,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatedSprite.h" />
+    <ClInclude Include="BlackHairedMILF.h" />
     <ClInclude Include="CustomWindow.h" />
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="RenderCommandEngine.h" />
@@ -149,8 +150,10 @@
     <ClInclude Include="ImageSprite.h" />
     <ClInclude Include="MemoryRenderer.h" />
     <ClInclude Include="RenderDevice.h" />
+    <ClInclude Include="SpatialHashGrid.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="StandardWindow.h" />
+    <ClInclude Include="StencilBuffer.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Window.h" />
     <ClInclude Include="WindowRenderer.h" />
