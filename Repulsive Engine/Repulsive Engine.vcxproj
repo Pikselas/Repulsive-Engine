@@ -141,7 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AnimatedSprite.h" />
-    <ClInclude Include="BlackHairedMILF.h" />
     <ClInclude Include="CustomWindow.h" />
     <ClInclude Include="CoreEngine.h" />
     <ClInclude Include="RenderCommandEngine.h" />

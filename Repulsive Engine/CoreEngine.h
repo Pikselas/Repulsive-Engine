@@ -4,14 +4,15 @@
 #pragma comment(lib,"D3DCompiler.lib")
 
 #include"CustomWindow.h"
-#include"StencilBuffer.h"
 #include"MemoryRenderer.h"
 #include"WindowRenderer.h"
 #include"AnimatedSprite.h"
 
+#include "ResourceEngine.h"
 #include "RenderCommandEngine.h"
 
-class CoreEngine : public RenderCommandEngine
+
+class CoreEngine : public RenderCommandEngine , public ResourceEngine
 {
 private:
 	template<typename ObjectT>
@@ -21,8 +22,6 @@ private:
 	{
 		float x, y;
 	};
-private:
-	ObjectManager<ID3D11Device>				graphics_device;
 private:
 	ObjectManager<ID3D11InputLayout>		input_layout;
 private:
@@ -45,19 +44,19 @@ public:
 	void SetComponent(ID3D11ShaderResourceView* texture_view, std::pair<float, float> coord, std::pair<float, float> size) override;
 	void SetComponent(ID3D11Buffer* vertices) override;
 public:
-	void SetStencilBuffer(StencilBuffer& buffer);
-	void ClearStencilBuffer(StencilBuffer& buffer);
+	void SetStencilBuffer(StencilBuffer& buffer) override;
+	void ClearStencilBuffer(StencilBuffer& buffer) override;
 public:
-	void RemoveStencilBuffer();
-	void EndStencilClipping(unsigned int ref_value);
-	void BeginStencilClipping(unsigned int ref_value);
+	void RemoveStencilBuffer() override;
+	void EndStencilClipping(unsigned int ref_value) override;
+	void BeginStencilClipping(unsigned int ref_value) override;
 public:
-	StencilBuffer CreateStencilBuffer(unsigned int width, unsigned int height);
+	StencilBuffer CreateStencilBuffer(unsigned int width, unsigned int height) override;
 public:
-	Texture CreateTexture(const Image& image);
+	Texture CreateTexture(const Image& image) override;
 public:
-	ImageSprite CreateSprite(const Image& image);
-	ImageSprite CreateSprite(Texture texture, unsigned int width , unsigned int height);
+	ImageSprite CreateSprite(const Image& image) override;
+	ImageSprite CreateSprite(Texture texture, unsigned int width , unsigned int height) override;
 	AnimatedSprite CreateSprite(const std::vector<Image>& frames , std::chrono::milliseconds duration , std::optional<unsigned int> repeat_count = std::nullopt);
 public:
 	MemoryRenderer CreateRenderer(Image& image);
