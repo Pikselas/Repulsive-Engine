@@ -3,21 +3,24 @@
 #include"Sprite.h"
 #include"Texture.h"
 
-struct RenderContextData
-{
-	ID3D11Buffer* vertex_buffer;
-	DirectX::XMMATRIX transformation;
-	ID3D11ShaderResourceView* texture_view;
-	std::pair<float, float> texture_coord;
-	std::pair<float, float> texture_size;
-};
-
 class ImageSprite : public Sprite
 {
 	friend class CoreEngine;
+public:
+	struct RenderContextData
+	{
+		DirectX::XMMATRIX transformation;
+		ID3D11ShaderResourceView* texture_view;
+		std::pair<float, float> texture_coord;
+		std::pair<float, float> texture_size;
+	};
+public:
+	struct VertexType
+	{
+		float x, y;
+	};
 private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vertex_buffer;
-	Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
 private:
 	Texture texture;
 private:
@@ -36,13 +39,13 @@ public:
 
 		RenderContextData context_data
 		{
-			.vertex_buffer = vertex_buffer.Get(),
 			.transformation = GetTransformedWithPosition(),
 			.texture_view = texture.GetResourceView(),
 			.texture_coord = GetTextureCoord(),
 			.texture_size = GetTextureSize()
 		};
 
+		engine.SetVertexBuffer(vertex_buffer.Get());
 		engine.SetContextData(&context_data);
 		engine.Draw();
 	}
@@ -55,12 +58,12 @@ public:
 
 		RenderContextData context_data
 		{
-			.vertex_buffer = vertex_buffer.Get(),
 			.transformation = DirectX::XMMatrixIdentity(),
 			.texture_view = texture.GetResourceView(),
 			.texture_coord = GetTextureCoord(),
 			.texture_size = GetTextureSize()
 		};
+		engine.SetVertexBuffer(vertex_buffer.Get());
 		engine.SetContextData(&context_data);
 		engine.Draw();
 	}

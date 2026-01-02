@@ -7,9 +7,11 @@ namespace RenderAction
 {
 	class ImageSpriteRenderContext : public RenderContext
 	{
-	public:
+	private:
 		Shader::Config::ImageSpriteShader shd_config;
 		Resource::ConstantBuffer tex_coord_buff;
+	private:
+		Microsoft::WRL::ComPtr<ID3D11Buffer> index_buffer;
 	public:
 		ImageSpriteRenderContext(ID3D11Device* device, const std::filesystem::path& p)
 			:
@@ -17,6 +19,25 @@ namespace RenderAction
 			shd_config(device, p),
 			tex_coord_buff(device, sizeof(float) * 4)
 		{
+			constexpr unsigned int Indices[] =
+			{
+				2 , 0 ,1,
+				2 , 1 ,3,
+			};
+
+			D3D11_BUFFER_DESC ibd = { 0 };
+			ibd.ByteWidth = sizeof(unsigned int) * 6;
+			ibd.Usage = D3D11_USAGE_DEFAULT;
+			ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+			ibd.CPUAccessFlags = 0u;
+			ibd.MiscFlags = 0u;
+			ibd.StructureByteStride = sizeof(unsigned int);
+
+			D3D11_SUBRESOURCE_DATA isubd = { 0 };
+			isubd.pSysMem = Indices;
+
+			// create index buffer
+			device->CreateBuffer(&ibd, &isubd, &index_buffer);
 		}
 	public:
 		void Apply(ID3D11DeviceContext* context) const override
@@ -24,6 +45,8 @@ namespace RenderAction
 			std::vector<Resource::ConstantBuffer> arr = { transformation_buff , surface_size_buffer , tex_coord_buff };
 			Resource::BindConstantBuffers(context, std::span<Resource::ConstantBuffer>(arr), shd_config.getShader<Shader::VertexShader>()->GetConstantBufferBinder());
 			shd_config.BindToContext(context);
+
+			context->IASetIndexBuffer(index_buffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
 		}
 
 		void SetTextureResource(ID3D11DeviceContext* context, ID3D11ShaderResourceView* srv, std::pair<float, float> coord , std::pair<float, float> size) const
@@ -38,19 +61,8 @@ namespace RenderAction
 
 		void SetComponent(ID3D11DeviceContext* context , void* cmp) override
 		{
-			auto rcd = static_cast<RenderContextData*>(cmp);
-
-			struct VertexType
-			{
-				float x, y;
-			};
-
-			constexpr unsigned int offset = 0u;
-			constexpr unsigned int stride = sizeof(VertexType);
-			context->IASetVertexBuffers(0u, 1u, &rcd->vertex_buffer, &stride, &offset);
-
+			auto rcd = static_cast<ImageSprite::RenderContextData*>(cmp);
 			SetTransformation(context, rcd->transformation);
-			//auto trv = static_cast<ImageSprite::TextureResourceView*>(cmp);
 			SetTextureResource(context, rcd->texture_view, rcd->texture_coord, rcd->texture_size);
 		}
 	};
@@ -72,7 +84,7 @@ namespace EngineAdapter
 	public:
 		void Draw() override
 		{
-			engine.Draw();
+			engine.Draw(6);
 		}
 	public:
 		void ClearFrame(const RenderDevice& render_device)
@@ -87,18 +99,12 @@ namespace EngineAdapter
 
 		void SetVertexBuffer(ID3D11Buffer* vertices) override
 		{
-			engine.SetVertexBuffer(vertices, sizeof(CoreEngine::VertexType));
+			engine.SetVertexBuffer(vertices, sizeof(ImageSprite::VertexType));
 		}
 
 		void SetContextData(void* data) override
 		{
 			context.SetComponent(engine.GetDeviceContext(), data);
 		}
-
-		/*void SetUserComponent(void* cmp)
-		{
-			auto trv = static_cast<ImageSprite::TextureResourceView*>(cmp);
-			context.SetTextureResource(engine.GetDeviceContext(), trv->resource, trv->coord, trv->size);
-		}*/
 	};
 }

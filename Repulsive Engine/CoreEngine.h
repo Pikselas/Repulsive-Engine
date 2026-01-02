@@ -17,11 +17,6 @@ class CoreEngine : public ResourceEngine
 private:
 	template<typename ObjectT>
 	using ObjectManager = Microsoft::WRL::ComPtr<ObjectT>;
-public:
-	struct VertexType
-	{
-		float x, y;
-	};
 private:
 	RenderAction::RenderContext* render_context = nullptr;
 private:
@@ -37,6 +32,7 @@ private:
 	ObjectManager<ID3D11DepthStencilState> STENCIL_PASS_STATE;
 	ObjectManager<ID3D11DepthStencilState> STENCIL_CLIP_STATE;
 public:
+	void SetIndexBuffer(ID3D11Buffer* indices);
 	void SetVertexBuffer(ID3D11Buffer* vertices , unsigned int stride);
 public:
 	void SetRenderContext(RenderAction::RenderContext& context);
@@ -59,7 +55,7 @@ public:
 	MemoryRenderer CreateRenderer(Image& image);
 	WindowRenderer CreateRenderer(CustomWindow& window);
 public:
-	void Draw();
+	void Draw(unsigned int index_count);
 public:
 	ID3D11DeviceContext* GetDeviceContext() const
 	{
