@@ -58,13 +58,13 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
-		engine.ClearStencilBuffer(stencil_buffer);
+		cmd_engine.ClearStencilBuffer(stencil_buffer);
 		scroll_sp.Draw(cmd_engine);
 
-		engine.BeginStencilClipping(1);
+		cmd_engine.BeginStencilClipping(1);
 		bsp.Draw(cmd_engine);
 		bsp2.Draw(cmd_engine);
-		engine.EndStencilClipping(1);
+		cmd_engine.EndStencilClipping(1);
 
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();

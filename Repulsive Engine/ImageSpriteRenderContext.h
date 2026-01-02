@@ -97,14 +97,33 @@ namespace EngineAdapter
 			context.SetTransformation(engine.GetDeviceContext(), transformation);
 		}
 
-		void SetVertexBuffer(ID3D11Buffer* vertices) override
-		{
-			engine.SetVertexBuffer(vertices, sizeof(ImageSprite::VertexType));
-		}
-
 		void SetContextData(void* data) override
 		{
+			auto rcd = static_cast<ImageSprite::RenderContextData*>(data);
+			engine.SetVertexBuffer(rcd->vertex_buffer, sizeof(ImageSprite::VertexType));
 			context.SetComponent(engine.GetDeviceContext(), data);
+		}
+	public:
+		void SetStencilBuffer(StencilBuffer& buffer) override
+		{
+			engine.SetStencilBuffer(buffer);
+		}
+		void ClearStencilBuffer(StencilBuffer& buffer) override
+		{
+			engine.ClearStencilBuffer(buffer);
+		}
+	public:
+		void RemoveStencilBuffer() override
+		{
+			engine.RemoveStencilBuffer();
+		}
+		void EndStencilClipping(unsigned int ref_value) override
+		{
+			engine.EndStencilClipping(ref_value);
+		}
+		void BeginStencilClipping(unsigned int ref_value) override
+		{
+			engine.BeginStencilClipping(ref_value);
 		}
 	};
 }
