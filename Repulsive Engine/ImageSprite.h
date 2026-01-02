@@ -2,6 +2,16 @@
 #include<wrl.h>
 #include"Sprite.h"
 #include"Texture.h"
+
+struct RenderContextData
+{
+	ID3D11Buffer* vertex_buffer;
+	DirectX::XMMATRIX transformation;
+	ID3D11ShaderResourceView* texture_view;
+	std::pair<float, float> texture_coord;
+	std::pair<float, float> texture_size;
+};
+
 class ImageSprite : public Sprite
 {
 	friend class CoreEngine;
@@ -21,16 +31,37 @@ private:
 public:
 	void Draw(RenderCommandEngine& engine) const override
 	{
-		engine.SetComponent(GetTransformedWithPosition());
-		DrawNonTransformed(engine);
+		/*engine.SetComponent(GetTransformedWithPosition());
+		DrawNonTransformed(engine);*/
+
+		RenderContextData context_data
+		{
+			.vertex_buffer = vertex_buffer.Get(),
+			.transformation = GetTransformedWithPosition(),
+			.texture_view = texture.GetResourceView(),
+			.texture_coord = GetTextureCoord(),
+			.texture_size = GetTextureSize()
+		};
+
+		engine.SetContextData(&context_data);
+		engine.Draw();
 	}
 
 	void DrawNonTransformed(RenderCommandEngine& engine) const override
 	{
-		engine.SetComponent(index_buffer.Get());
-		engine.SetComponent(texture.GetResourceView(), GetTextureCoord(), GetTextureSize());
-		engine.SetComponent(vertex_buffer.Get());
+		//engine.SetComponent(index_buffer.Get());
+		/*engine.SetComponent(texture.GetResourceView(), GetTextureCoord(), GetTextureSize());
+		engine.SetComponent(vertex_buffer.Get());*/
 
+		RenderContextData context_data
+		{
+			.vertex_buffer = vertex_buffer.Get(),
+			.transformation = DirectX::XMMatrixIdentity(),
+			.texture_view = texture.GetResourceView(),
+			.texture_coord = GetTextureCoord(),
+			.texture_size = GetTextureSize()
+		};
+		engine.SetContextData(&context_data);
 		engine.Draw();
 	}
 public:

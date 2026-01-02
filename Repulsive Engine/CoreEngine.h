@@ -9,27 +9,24 @@
 #include"AnimatedSprite.h"
 
 #include "ResourceEngine.h"
-#include "RenderCommandEngine.h"
+#include "RenderActionContext.h"
 
 
-class CoreEngine : public RenderCommandEngine , public ResourceEngine
+class CoreEngine : public ResourceEngine
 {
 private:
 	template<typename ObjectT>
 	using ObjectManager = Microsoft::WRL::ComPtr<ObjectT>;
-private:
+public:
 	struct VertexType
 	{
 		float x, y;
 	};
 private:
-	ObjectManager<ID3D11InputLayout>		input_layout;
+	RenderAction::RenderContext* render_context = nullptr;
 private:
-	ObjectManager<ID3D11VertexShader>		vertex_shader;
-	ObjectManager<ID3D11PixelShader>		pixel_shader;
+	ObjectManager<ID3D11DeviceContext>		device_context;
 private:
-	ObjectManager<ID3D11Buffer>				vertex_shader_transform_buffer;
-	ObjectManager<ID3D11Buffer>				vertex_shader_texture_coord_buffer;
 	ObjectManager<ID3D11Buffer>				index_buffer;
 public:
 	CoreEngine();
@@ -40,16 +37,16 @@ private:
 	ObjectManager<ID3D11DepthStencilState> STENCIL_PASS_STATE;
 	ObjectManager<ID3D11DepthStencilState> STENCIL_CLIP_STATE;
 public:
-	void SetComponent(const DirectX::XMMATRIX transformation) override;
-	void SetComponent(ID3D11ShaderResourceView* texture_view, std::pair<float, float> coord, std::pair<float, float> size) override;
-	void SetComponent(ID3D11Buffer* vertices) override;
+	void SetVertexBuffer(ID3D11Buffer* vertices , unsigned int stride);
 public:
-	void SetStencilBuffer(StencilBuffer& buffer) override;
-	void ClearStencilBuffer(StencilBuffer& buffer) override;
+	void SetRenderContext(RenderAction::RenderContext& context);
 public:
-	void RemoveStencilBuffer() override;
-	void EndStencilClipping(unsigned int ref_value) override;
-	void BeginStencilClipping(unsigned int ref_value) override;
+	void SetStencilBuffer(StencilBuffer& buffer) ;
+	void ClearStencilBuffer(StencilBuffer& buffer);
+public:
+	void RemoveStencilBuffer();
+	void EndStencilClipping(unsigned int ref_value);
+	void BeginStencilClipping(unsigned int ref_value);
 public:
 	StencilBuffer CreateStencilBuffer(unsigned int width, unsigned int height) override;
 public:
@@ -62,5 +59,47 @@ public:
 	MemoryRenderer CreateRenderer(Image& image);
 	WindowRenderer CreateRenderer(CustomWindow& window);
 public:
-	void Draw() override;
+	void Draw();
+public:
+	ID3D11DeviceContext* GetDeviceContext() const
+	{
+		return device_context.Get();
+	}
+	ID3D11Device* GetDevice() const
+	{
+		return graphics_device.Get();
+	}
+
+	void ClearFrame(const RenderDevice& render_device)
+	{
+		device_context->ClearRenderTargetView(render_device.GetTarget(), DirectX::Colors::White);
+	}
+
+	void SetContextData(void* data)
+	{
+		if (render_context)
+			render_context->SetComponent(device_context.Get(), data);
+	}
+
+	void SetRenderDevice(const RenderDevice& render_device)
+	{
+		// create and set the viewport
+		D3D11_VIEWPORT viewport = {};
+		viewport.TopLeftX = 0;
+		viewport.TopLeftY = 0;
+		viewport.Width = render_device.GetWidth();
+		viewport.Height = render_device.GetHeight();
+		viewport.MaxDepth = 1;	// maximum depth for z axis
+		viewport.MinDepth = 0;	// minimum depth for z axis
+
+		device_context->RSSetViewports(1u, &viewport);
+
+		if (render_context)
+		{
+			render_context->SetSurfaceSize(device_context.Get(), render_device.GetWidth() , render_device.GetHeight());
+		}
+
+		auto render_target_view = render_device.GetTarget();
+		device_context->OMSetRenderTargets(1u, &render_target_view, nullptr);
+	}
 };

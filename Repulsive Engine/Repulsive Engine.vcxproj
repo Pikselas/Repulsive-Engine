@@ -143,12 +143,17 @@
     <ClInclude Include="AnimatedSprite.h" />
     <ClInclude Include="CustomWindow.h" />
     <ClInclude Include="CoreEngine.h" />
+    <ClInclude Include="EngineResources.h" />
+    <ClInclude Include="ImageSpriteRenderContext.h" />
+    <ClInclude Include="RenderActionContext.h" />
+    <ClInclude Include="RenderActionContextComponent.h" />
     <ClInclude Include="RenderCommandEngine.h" />
     <ClInclude Include="GDIPlusManager.h" />
     <ClInclude Include="Image.h" />
     <ClInclude Include="ImageSprite.h" />
     <ClInclude Include="MemoryRenderer.h" />
     <ClInclude Include="RenderDevice.h" />
+    <ClInclude Include="Shader.h" />
     <ClInclude Include="SpatialHashGrid.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="StandardWindow.h" />

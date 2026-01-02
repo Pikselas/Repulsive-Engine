@@ -17,7 +17,7 @@ protected:
 		width(width),
 		height(height)
 	{}
-private:
+public:
 	ID3D11RenderTargetView* GetTarget() const
 	{
 		return render_target_view.Get();
@@ -40,4 +40,7 @@ public:
 
 		context->CopyResource(render_surface, renderer.render_surface);
 	}
+
+	unsigned int GetWidth() const { return width; }
+	unsigned int GetHeight() const { return height; }
 };

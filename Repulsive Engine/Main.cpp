@@ -5,11 +5,21 @@
 #include <random>
 
 #include "SpatialHashGrid.h"
-
+#include "ImageSpriteRenderContext.h"
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
 	CoreEngine engine;
+
+	char buffer[MAX_PATH];
+	GetModuleFileName(nullptr, buffer, 100);
+	std::filesystem::path path = buffer;
+	auto program_dir = path.parent_path();
+
+	RenderAction::ImageSpriteRenderContext ims_ctx(engine.GetDevice(), program_dir);
+	engine.SetRenderContext(ims_ctx);
+
+	EngineAdapter::ImageSpriteRenderingAdapter ims_adapter(engine, ims_ctx);
 
 	StandardWindow window("Repulsive Engine" , 800 , 600);
 	window.SetIcon("Media/logo.ico");
@@ -42,18 +52,20 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			bsp.SetPosition(DirectX::XMVectorAdd(bsp.GetPosition(), pos));
 			bsp2.SetPosition(DirectX::XMVectorAdd(bsp2.GetPosition(), pos));
 		};
+	
+	RenderCommandEngine& cmd_engine = ims_adapter;
 
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
 		engine.ClearStencilBuffer(stencil_buffer);
-		scroll_sp.Draw(engine);
-		
+		scroll_sp.Draw(cmd_engine);
+
 		engine.BeginStencilClipping(1);
-		bsp.Draw(engine);
-		bsp2.Draw(engine);
+		bsp.Draw(cmd_engine);
+		bsp2.Draw(cmd_engine);
 		engine.EndStencilClipping(1);
-		
+
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
 	}

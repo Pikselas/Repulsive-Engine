@@ -7,52 +7,6 @@ CoreEngine::CoreEngine()
 	// set the primitive topology
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	char buffer[MAX_PATH];
-	GetModuleFileName(nullptr, buffer, 100);
-	std::filesystem::path path = buffer;
-	auto program_dir = path.parent_path();
-
-	auto vertex_shader_path = program_dir / "VertexShader.cso";
-	auto pixel_shader_path = program_dir / "PixelShader.cso";
-
-	ObjectManager<ID3DBlob> shader_buffer;
-	D3DReadFileToBlob(vertex_shader_path.c_str(), &shader_buffer);
-	graphics_device->CreateVertexShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &vertex_shader);
-	device_context->VSSetShader(vertex_shader.Get(), nullptr, 0);
-
-	D3D11_INPUT_ELEMENT_DESC ied[] = 
-	{
-		{"POSITION",0,DXGI_FORMAT_R32G32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA,0}
-	};
-
-	//{"TEXCOORD",0,DXGI_FORMAT_R32G32_FLOAT,0,sizeof(float) * 2,D3D11_INPUT_PER_VERTEX_DATA,0},
-
-	graphics_device->CreateInputLayout(ied, std::size(ied), shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), &input_layout);
-	device_context->IASetInputLayout(input_layout.Get());
-
-	D3DReadFileToBlob(pixel_shader_path.c_str(), &shader_buffer);
-	graphics_device->CreatePixelShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &pixel_shader);
-	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
-
-	D3D11_BUFFER_DESC bd = { 0 };
-	bd.ByteWidth = sizeof(DirectX::XMMATRIX);
-	bd.Usage = D3D11_USAGE_DYNAMIC;
-	bd.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	bd.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_transform_buffer);
-	
-
-	// minimum constant buffer size is 16 bytes (multiple of 16)
-	bd.ByteWidth = sizeof(float) * 2 < 16 ? 16 : sizeof(float) * 2;
-	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_surface_size_buffer);
-
-	bd.ByteWidth = sizeof(float) * 4;
-	graphics_device->CreateBuffer(&bd, nullptr, &vertex_shader_texture_coord_buffer);
-
-	ID3D11Buffer* const shader_buffers[] = { vertex_shader_transform_buffer.Get() , vertex_shader_surface_size_buffer.Get() ,vertex_shader_texture_coord_buffer.Get() };
-	device_context->VSSetConstantBuffers(0u, std::size(shader_buffers), shader_buffers);
-
 	D3D11_BLEND_DESC blendDesc = {};
 	blendDesc.RenderTarget[0].BlendEnable = TRUE;
 	blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;							// uses the alpha channel of the source pixel as the blend factor,
@@ -132,19 +86,17 @@ CoreEngine::CoreEngine()
 	device_context->OMSetDepthStencilState(STENCIL_PASS_STATE.Get(), 1);
 }
 
-void CoreEngine::SetComponent(const DirectX::XMMATRIX transformation)
-{
-	D3D11_MAPPED_SUBRESOURCE ms;
-	device_context->Map(vertex_shader_transform_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
-	std::memcpy(ms.pData, &transformation, sizeof(DirectX::XMMATRIX));
-	device_context->Unmap(vertex_shader_transform_buffer.Get(), 0u);
-}
 
-void CoreEngine::SetComponent(ID3D11Buffer* vertices)
+void CoreEngine::SetVertexBuffer(ID3D11Buffer* vertices, unsigned int stride)
 {
 	constexpr unsigned int offset = 0u;
-	constexpr unsigned int stride = sizeof(VertexType);
-	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride , &offset);
+	device_context->IASetVertexBuffers(0u, 1u, &vertices, &stride, &offset);
+}
+
+void CoreEngine::SetRenderContext(RenderAction::RenderContext& context)
+{
+	render_context = &context;
+	context.Apply(device_context.Get());
 }
 
 void CoreEngine::SetStencilBuffer(StencilBuffer& buffer)
@@ -186,18 +138,6 @@ StencilBuffer CoreEngine::CreateStencilBuffer(unsigned int width, unsigned int h
 Texture CoreEngine::CreateTexture(const Image& image)
 {
 	return Texture{ graphics_device.Get() , image };
-}
-
-void CoreEngine::SetComponent(ID3D11ShaderResourceView* texture_view , std::pair<float, float> coord , std::pair<float, float> size)
-{
-	device_context->PSSetShaderResources(0u, 1u, &texture_view);
-
-	const std::pair<float, float> c_data[] = { coord , size };
-
-	D3D11_MAPPED_SUBRESOURCE ms;
-	device_context->Map(vertex_shader_texture_coord_buffer.Get(), 0u, D3D11_MAP_WRITE_DISCARD, 0u, &ms);
-	std::memcpy(ms.pData, c_data, sizeof(c_data));
-	device_context->Unmap(vertex_shader_texture_coord_buffer.Get(), 0u);
 }
 
 ImageSprite CoreEngine::CreateSprite(const Image& image)
