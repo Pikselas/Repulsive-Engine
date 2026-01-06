@@ -5,6 +5,7 @@
 #include <random>
 
 #include "SpatialHashGrid.h"
+#include "Object3DRenderContext.h"
 #include "ImageSpriteRenderContext.h"
 
 int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
@@ -16,7 +17,33 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	std::filesystem::path path = buffer;
 	auto program_dir = path.parent_path();
 
-	RenderAction::ImageSpriteRenderContext ims_ctx(engine.GetDevice(), program_dir);
+	RenderAction::Object3DRenderContext o3d_ctx(engine.GetDevice(), program_dir);
+	engine.SetRenderContext(o3d_ctx);
+
+	EngineAdapter::Object3DRenderingAdapter o3d_adapter(engine, o3d_ctx);
+
+	StandardWindow window("Repulsive Engine", 800, 600);
+	window.SetIcon("Media/logo.ico");
+	auto window_renderer = engine.CreateRenderer(window);
+	engine.SetRenderDevice(window_renderer);
+
+	Cube cube(engine.GetDevice());
+
+	cube.SetPosition(0.0f, 0.0f, 0.0f);
+
+	std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
+
+	while (window.IsOpen())
+	{
+		//engine.ClearFrame(window_renderer);
+		auto dist = std::chrono::duration<float>(std::chrono::steady_clock::now() - last_time);
+		cube.RotateFixedPoint(0.0f , dist.count(), dist.count());
+		cube.Draw(o3d_adapter);
+		window_renderer.RenderFrame();
+		Window::DispatchWindowEventsNonBlocking();
+	}
+
+	/*RenderAction::ImageSpriteRenderContext ims_ctx(engine.GetDevice(), program_dir);
 	engine.SetRenderContext(ims_ctx);
 
 	EngineAdapter::ImageSpriteRenderingAdapter ims_adapter(engine, ims_ctx);
@@ -68,7 +95,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
-	}
+	}*/
 
 	return 0;
 }

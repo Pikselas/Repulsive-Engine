@@ -37,7 +37,7 @@ namespace RenderAction
 			std::memcpy(ms.pData, surface_size, sizeof(float) * std::size(surface_size));
 			context->Unmap(surface_size_buffer.GetBuffer().Get(), 0u);
 		}
-		virtual void SetComponent(ID3D11DeviceContext*,void*) {}
+		virtual void SetComponent(ID3D11DeviceContext*, void*) {}
 	public:
 		virtual void Apply(ID3D11DeviceContext* context) const = 0;
 	};

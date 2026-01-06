@@ -16,6 +16,18 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{605e5be8-5753-4a4a-8ff3-6f7d56b048da}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\Vertex">
+      <UniqueIdentifier>{feb901b9-ab67-480b-94a8-5d581bac3d13}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Pixel">
+      <UniqueIdentifier>{479223d4-f7ed-4ea5-9d5a-54f44f94ec08}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Includes">
+      <UniqueIdentifier>{5b2a2419-f24c-48ef-bc2b-2d46d9a62c85}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Geometry">
+      <UniqueIdentifier>{d30aa736-587b-4d57-8ee9-e791cff1b169}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CustomWindow.cpp">
@@ -104,13 +116,39 @@
     <ClInclude Include="ImageSpriteRenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Object3DRenderContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Object3D.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="GS_Object3D.hlsl">
+      <Filter>Shaders\Geometry</Filter>
+    </FxCompile>
+    <FxCompile Include="PS_Object3D.hlsl">
+      <Filter>Shaders\Pixel</Filter>
+    </FxCompile>
+    <FxCompile Include="VS_Object3D.hlsl">
+      <Filter>Shaders\Vertex</Filter>
+    </FxCompile>
     <FxCompile Include="VertexShader.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Vertex</Filter>
     </FxCompile>
     <FxCompile Include="PixelShader.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\Pixel</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Common_Includes.hlsli">
+      <Filter>Shaders\Includes</Filter>
+    </None>
+    <None Include="Common_VertexShader_Includes.hlsli">
+      <Filter>Shaders\Includes</Filter>
+    </None>
   </ItemGroup>
 </Project>

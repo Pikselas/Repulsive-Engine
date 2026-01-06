@@ -124,7 +124,6 @@ namespace Shader
 		{
 			Microsoft::WRL::ComPtr<ID3DBlob> shader_buffer;
 			D3DReadFileToBlob(cso_file.c_str(), &shader_buffer);
-			//CallOnDevice(c3d, &ID3D11Device::CreatePixelShader, shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &SHADER);
 			device->CreatePixelShader(shader_buffer->GetBufferPointer(), shader_buffer->GetBufferSize(), nullptr, &shader);
 			set_const_buffer_binder(&ID3D11DeviceContext::PSSetConstantBuffers);
 		}
@@ -132,6 +131,26 @@ namespace Shader
 		void Bind(ID3D11DeviceContext* context) const override
 		{
 			context->PSSetShader(shader.Get(), nullptr, 0);
+		}
+	};
+
+	class GeometryShader : public Shader
+	{
+	private:
+		Microsoft::WRL::ComPtr<ID3D11GeometryShader> shader;
+	public:
+		GeometryShader() = default;
+		GeometryShader(ID3D11Device* device , const std::filesystem::path& cso_file)
+		{
+			Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
+			D3DReadFileToBlob(cso_file.c_str(), &pBlob);
+			device->CreateGeometryShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &shader);
+			set_const_buffer_binder(&ID3D11DeviceContext::GSSetConstantBuffers);
+		}
+	public:
+		void Bind(ID3D11DeviceContext* context) const override
+		{
+			context->GSSetShader(shader.Get(), nullptr, 0u);
 		}
 	};
 
@@ -153,6 +172,30 @@ namespace Shader
 				p_shader = PixelShader{ device , p_dir / "PixelShader.cso" };
 
 				AddShader(v_shader);
+				AddShader(p_shader);
+			}
+		};
+
+		class Object3DShader : public ShaderConfiguration
+		{
+			PixelShader p_shader;
+			VertexShader v_shader;
+			GeometryShader g_shader;
+		public:
+			Object3DShader(ID3D11Device* device, const std::filesystem::path& p_dir)
+			{
+				const std::array<VertexShader::InputElemDesc,2> input_desc
+				{
+					VertexShader::InputElemDesc{"POSITION" ,VertexShader::InputElemDesc::INPUT_FORMAT::FLOAT3 , 0},
+					VertexShader::InputElemDesc{"COLOR" , VertexShader::InputElemDesc::INPUT_FORMAT::UINT4, sizeof(float) * 3}
+				};
+
+				v_shader = VertexShader{ device , p_dir / "VS_Object3D.cso" , input_desc };
+				p_shader = PixelShader{ device , p_dir / "PS_Object3D.cso" };
+				g_shader = GeometryShader{ device , p_dir / "GS_Object3D.cso" };
+
+				AddShader(v_shader);
+				AddShader(g_shader);
 				AddShader(p_shader);
 			}
 		};

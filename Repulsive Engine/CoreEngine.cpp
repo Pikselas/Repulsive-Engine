@@ -44,13 +44,13 @@ CoreEngine::CoreEngine()
 
 	D3D11_RASTERIZER_DESC rasterDesc = {};
 	
-	rasterDesc.FillMode = D3D11_FILL_SOLID;
-	rasterDesc.CullMode = D3D11_CULL_NONE; // Disable culling
-	rasterDesc.FrontCounterClockwise = false;
-	rasterDesc.DepthClipEnable = true;
+	//rasterDesc.FillMode = D3D11_FILL_SOLID;
+	//rasterDesc.CullMode = D3D11_CULL_NONE; // Disable culling
+	//rasterDesc.FrontCounterClockwise = false;
+	//rasterDesc.DepthClipEnable = true;
 
-	graphics_device->CreateRasterizerState(&rasterDesc, &raster_state);
-	device_context->RSSetState(raster_state.Get());
+	//graphics_device->CreateRasterizerState(&rasterDesc, &raster_state);
+	//device_context->RSSetState(raster_state.Get());
 
 	D3D11_DEPTH_STENCIL_DESC stencilDesc;
 	ZeroMemory(&stencilDesc, sizeof(stencilDesc));
