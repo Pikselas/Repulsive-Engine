@@ -18,40 +18,32 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	auto program_dir = path.parent_path();
 
 	RenderAction::Object3DRenderContext o3d_ctx(engine.GetDevice(), program_dir);
-	engine.SetRenderContext(o3d_ctx);
-
 	EngineAdapter::Object3DRenderingAdapter o3d_adapter(engine, o3d_ctx);
+
+	RenderAction::ImageSpriteRenderContext ims_ctx(engine.GetDevice(), program_dir);
+	EngineAdapter::ImageSpriteRenderingAdapter ims_adapter(engine, ims_ctx);
 
 	StandardWindow window("Repulsive Engine", 800, 600);
 	window.SetIcon("Media/logo.ico");
 	auto window_renderer = engine.CreateRenderer(window);
+
 	engine.SetRenderDevice(window_renderer);
+
+	o3d_ctx.SetSurfaceSize(engine.GetDeviceContext(), window_renderer.GetWidth(), window_renderer.GetHeight());
+	ims_ctx.SetSurfaceSize(engine.GetDeviceContext(), window_renderer.GetWidth(), window_renderer.GetHeight());
 
 	Cube cube(engine.GetDevice());
+	cube.SetPosition(1.0f, -0.5f, 0.0f);
 
-	cube.SetPosition(0.0f, 0.0f, 0.0f);
-
-	std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
-
-	while (window.IsOpen())
-	{
-		//engine.ClearFrame(window_renderer);
-		auto dist = std::chrono::duration<float>(std::chrono::steady_clock::now() - last_time);
-		cube.RotateFixedPoint(0.0f , dist.count(), dist.count());
-		cube.Draw(o3d_adapter);
-		window_renderer.RenderFrame();
-		Window::DispatchWindowEventsNonBlocking();
-	}
-
-	/*RenderAction::ImageSpriteRenderContext ims_ctx(engine.GetDevice(), program_dir);
-	engine.SetRenderContext(ims_ctx);
-
-	EngineAdapter::ImageSpriteRenderingAdapter ims_adapter(engine, ims_ctx);
-
-	StandardWindow window("Repulsive Engine" , 800 , 600);
-	window.SetIcon("Media/logo.ico");
-	auto window_renderer = engine.CreateRenderer(window);
-	engine.SetRenderDevice(window_renderer);
+	//while (window.IsOpen())
+	//{
+	//	engine.ClearFrame(window_renderer);	
+	//	auto dist = std::chrono::duration<float>(std::chrono::steady_clock::now() - last_time);
+	//	cube.RotateFixedPoint(0.0f , dist.count(), dist.count());
+	//	cube.Draw(o3d_adapter);
+	//	window_renderer.RenderFrame();
+	//	Window::DispatchWindowEventsNonBlocking();
+	//}
 	
 	Image scroll_window(400 , 350);
 	scroll_window.Clear({ .b = 100 , .g = 50 , .r = 150 });
@@ -80,22 +72,35 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 			bsp2.SetPosition(DirectX::XMVectorAdd(bsp2.GetPosition(), pos));
 		};
 	
+	std::chrono::steady_clock::time_point last_time = std::chrono::steady_clock::now();
+
 	RenderCommandEngine& cmd_engine = ims_adapter;
 
 	while (window.IsOpen())
 	{
 		engine.ClearFrame(window_renderer);
 		cmd_engine.ClearStencilBuffer(stencil_buffer);
+		
+		// Drawing ImageSprite
+		engine.SetRenderContext(ims_ctx);
 		scroll_sp.Draw(cmd_engine);
 
 		cmd_engine.BeginStencilClipping(1);
+		
 		bsp.Draw(cmd_engine);
 		bsp2.Draw(cmd_engine);
+		
+		// Drawing Object3D
+		engine.SetRenderContext(o3d_ctx);
+		auto dist = std::chrono::duration<float>(std::chrono::steady_clock::now() - last_time);
+		cube.RotateFixedPoint(0.0f , dist.count(), dist.count());
+		cube.Draw(o3d_adapter);
+		
 		cmd_engine.EndStencilClipping(1);
 
 		window_renderer.RenderFrame();
 		Window::DispatchWindowEventsNonBlocking();
-	}*/
+	}
 
 	return 0;
 }

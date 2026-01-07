@@ -99,6 +99,8 @@ void CoreEngine::SetVertexBuffer(ID3D11Buffer* vertices, unsigned int stride)
 
 void CoreEngine::SetRenderContext(RenderAction::RenderContext& context)
 {
+	if (render_context)
+		render_context->UnApply(device_context.Get());
 	render_context = &context;
 	context.Apply(device_context.Get());
 }

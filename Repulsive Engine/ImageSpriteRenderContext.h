@@ -49,6 +49,18 @@ namespace RenderAction
 			context->IASetIndexBuffer(index_buffer.Get(), DXGI_FORMAT_R32_UINT, 0u);
 		}
 
+		void UnApply(ID3D11DeviceContext* context) const override
+		{
+			ID3D11Buffer* null_buf[] = { nullptr , nullptr , nullptr };
+			context->VSSetConstantBuffers(0u, 3u, null_buf);
+			ID3D11ShaderResourceView* null_srv[] = { nullptr };
+			context->PSSetShaderResources(0u, 1u, null_srv);
+
+			context->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0u);
+
+			shd_config.UnBindFromContext(context);
+		}
+
 		void SetTextureResource(ID3D11DeviceContext* context, ID3D11ShaderResourceView* srv, std::pair<float, float> coord , std::pair<float, float> size) const
 		{
 			context->PSSetShaderResources(0u, 1u, &srv);

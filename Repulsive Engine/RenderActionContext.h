@@ -40,5 +40,6 @@ namespace RenderAction
 		virtual void SetComponent(ID3D11DeviceContext*, void*) {}
 	public:
 		virtual void Apply(ID3D11DeviceContext* context) const = 0;
+		virtual void UnApply(ID3D11DeviceContext* context) const = 0;
 	};
 }

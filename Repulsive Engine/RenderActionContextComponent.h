@@ -7,6 +7,7 @@ namespace RenderAction
 	{
 	public:
 		virtual void BindToContext(ID3D11DeviceContext*) const = 0;
+		virtual void UnBindFromContext(ID3D11DeviceContext*) const = 0;
 		virtual ~ContextComponent() = default;
 	};
 }

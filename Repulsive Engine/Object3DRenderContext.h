@@ -29,6 +29,15 @@ namespace RenderAction
 			shd_config.BindToContext(context);
 		}
 
+		void UnApply(ID3D11DeviceContext* context) const override
+		{
+			ID3D11Buffer* null_buf[] = { nullptr , nullptr };
+			context->VSSetConstantBuffers(0u, 2u, null_buf);
+			context->IASetIndexBuffer(nullptr, DXGI_FORMAT_R32_UINT, 0u);
+
+			shd_config.UnBindFromContext(context);
+		}
+
 		void SetComponent(ID3D11DeviceContext* context, void* cmp) override
 		{
 			auto rcd = static_cast<Object3D::RenderContextData*>(cmp);
