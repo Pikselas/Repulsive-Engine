@@ -33,7 +33,7 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	ims_ctx.SetSurfaceSize(engine.GetDeviceContext(), window_renderer.GetWidth(), window_renderer.GetHeight());
 
 	Cube cube(engine.GetDevice());
-	cube.SetPosition(1.0f, -0.5f, 0.0f);
+	cube.SetPosition(0.5f, -0.5f, 7.0f);
 
 	//while (window.IsOpen())
 	//{
@@ -46,11 +46,11 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	//}
 	
 	Image scroll_window(400 , 350);
-	scroll_window.Clear({ .b = 100 , .g = 50 , .r = 150 });
+	scroll_window.Clear({ .b = 100 , .g = 50 , .r = 150 , .a = 100});
 	auto scroll_sp = engine.CreateSprite(scroll_window);
 
 	Image button{ 100 , 50 };
-	button.Clear({ .b = 150 , .g = 100 , .r = 50 });
+	button.Clear({ .b = 150 , .g = 100 , .r = 50 , .a = 150 });
 	auto bsp = engine.CreateSprite(button);
 	auto bsp2 = bsp;
 
@@ -59,7 +59,6 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 	scroll_sp.SetPosition(DirectX::XMVectorSet(350, 250, 1, 1));
 
 	auto stencil_buffer = engine.CreateStencilBuffer(800, 600);
-	engine.SetStencilBuffer(stencil_buffer);
 
 	auto sheet_pos = DirectX::XMVectorZero();
 
@@ -78,6 +77,9 @@ int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLi
 
 	while (window.IsOpen())
 	{
+		engine.SetRenderDevice(window_renderer);
+		engine.SetStencilBuffer(stencil_buffer);
+
 		engine.ClearFrame(window_renderer);
 		cmd_engine.ClearStencilBuffer(stencil_buffer);
 		

@@ -5,6 +5,9 @@ Window::Window(Window * Parent , DWORD exStyle , const std::string& window_class
 height(height), width(width)
 {
 	Style |= WS_VISIBLE;
+	Style |= WS_OVERLAPPED;
+
+	exStyle |= WS_EX_NOREDIRECTIONBITMAP;
 
 	RECT wr = {0};
 	wr.right = width;

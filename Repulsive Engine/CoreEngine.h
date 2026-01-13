@@ -68,7 +68,7 @@ public:
 
 	void ClearFrame(const RenderDevice& render_device)
 	{
-		device_context->ClearRenderTargetView(render_device.GetTarget(), DirectX::Colors::White);
+		device_context->ClearRenderTargetView(render_device.GetTarget(), DirectX::Colors::Transparent);
 	}
 
 	void SetContextData(void* data)

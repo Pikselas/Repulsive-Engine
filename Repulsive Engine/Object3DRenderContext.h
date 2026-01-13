@@ -19,7 +19,7 @@ namespace RenderAction
 			RenderContext(device),
 			shd_config(device, p)
 		{
-			camera.SetZ(10.0f);
+			camera.SetZ(1.0f);
 		}
 	public:
 		void Apply(ID3D11DeviceContext* context) const override
